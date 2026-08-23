@@ -48,7 +48,7 @@ SOL
 - [x] Document vision and architecture.
 - [x] Create minimal context files.
 - [x] Add task management foundation.
-- [ ] Add agent workflow guidance.
+- [x] Add agent workflow guidance.
 - [ ] Complete final documentation and quality review.
 
 ## Decisions needed
