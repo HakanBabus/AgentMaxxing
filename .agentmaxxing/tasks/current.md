@@ -2,7 +2,7 @@
 
 ## Status
 
-Executing
+Completed
 
 ## Goal
 
@@ -47,8 +47,8 @@ SOL
 - [x] Add explicit UI invocation policy.
 - [x] Add deterministic context helper and tests.
 - [x] Document personal installation and restart behavior.
-- [ ] Run all validation and push the canonical source.
-- [ ] Install from GitHub and verify the personal copy.
+- [x] Run all validation and push the canonical source.
+- [x] Install from GitHub and verify the personal copy.
 
 ## Decisions needed
 

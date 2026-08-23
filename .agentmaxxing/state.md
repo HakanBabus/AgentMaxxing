@@ -17,10 +17,12 @@ Make `$agentmaxxing` discoverable as a personal skill and verify real use.
 - Codex workflow and open-source contribution guidance added.
 - Repo-scoped `$agentmaxxing` v0.1 skill implemented.
 - Public GitHub repository published.
+- Personal `$agentmaxxing` installation completed from the canonical GitHub source.
+- Installed context initialization and validation flow smoke-tested.
 
 ## Working
 
-- Personal installation and end-to-end skill validation.
+- No implementation task is active.
 
 ## Blocked
 
@@ -28,6 +30,6 @@ Make `$agentmaxxing` discoverable as a personal skill and verify real use.
 
 ## Next
 
-- Verify explicit and implicit activation from a different repository.
+- Exercise explicit and implicit activation on real repository work.
 - Define Phase 2 acceptance criteria before choosing an implementation stack.
 - Refine routing rules only from observed skill behavior.
