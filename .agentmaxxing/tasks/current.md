@@ -47,11 +47,10 @@ SOL
 - [x] Initialize repository structure.
 - [x] Document vision and architecture.
 - [x] Create minimal context files.
-- [ ] Add task management foundation.
+- [x] Add task management foundation.
 - [ ] Add agent workflow guidance.
 - [ ] Complete final documentation and quality review.
 
 ## Decisions needed
 
 None.
-
