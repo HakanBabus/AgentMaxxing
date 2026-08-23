@@ -173,6 +173,24 @@ yeniden keşfetmek zorunda kalmaz.
 Bu repository’de kullanılabilir referans uygulama, repo-scoped
 [`$agentmaxxing` skill’idir](.agents/skills/agentmaxxing/SKILL.md).
 
+### Kişisel skill olarak kurulum
+
+AgentMaxxing’in tüm repository’lerde görünmesi için Codex’in yerleşik
+kurucusunu kullanın:
+
+```text
+$skill-installer agentmaxxing skill'ini https://github.com/HakanBabus/AgentMaxxing/tree/main/.agents/skills/agentmaxxing adresinden kur
+```
+
+Kurulumdan sonra yeni bir Codex turu başlatın. Skill hâlâ görünmezse Codex’i
+yeniden başlatın ve `$agentmaxxing` ile açıkça çağırın.
+
+Yalnızca repository kapsamında kullanmak için skill klasörünü
+`.agents/skills/agentmaxxing/` konumunda tutun ve Codex’i o repository’den veya
+alt dizinlerinden başlatın.
+
+### Çalıştırma
+
 Codex içinde somut bir repository göreviyle çağırın:
 
 ```text
@@ -186,10 +204,10 @@ Skill şu davranışları destekler:
 - Uzmanlara küçük ve ölçülebilir task envelope’lar gönderir.
 - Handoff’ları acceptance kriterlerine karşı doğrular.
 - Kalıcı context’i yalnızca SOL’un güncellemesine izin verir.
+- Üç kalıcı context dosyasını güvenli biçimde başlatır ve doğrular.
 
-Başka bir repository’de kullanmak için `agentmaxxing` skill klasörünü o
-repository’nin `.agents/skills/` dizinine kopyalayın. Workflow bağımsız bir skill
-olarak kalır; plugin paketlemesi bilerek kapsam dışındadır.
+Workflow bağımsız bir skill olarak kalır; plugin paketlemesi bilerek kapsam
+dışındadır.
 
 ## ◫ Dokümantasyon haritası
 

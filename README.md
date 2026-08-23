@@ -172,6 +172,23 @@ the specialist from rediscovering the entire repository.
 The reference implementation in this repository is the repo-scoped
 [`$agentmaxxing` skill](.agents/skills/agentmaxxing/SKILL.md).
 
+### Install as a personal skill
+
+Use Codex's built-in installer so AgentMaxxing is available in every repository:
+
+```text
+$skill-installer install the agentmaxxing skill from https://github.com/HakanBabus/AgentMaxxing/tree/main/.agents/skills/agentmaxxing
+```
+
+Start a new Codex turn after installation. If the skill still does not appear,
+restart Codex and invoke it explicitly with `$agentmaxxing`.
+
+For repo-only use, keep or copy the skill folder at
+`.agents/skills/agentmaxxing/` and launch Codex from that repository or one of
+its subdirectories.
+
+### Run it
+
 Invoke it from Codex with a concrete repository task:
 
 ```text
@@ -185,10 +202,10 @@ The skill:
 - Gives specialists small, measurable task envelopes.
 - Validates handoffs against acceptance criteria.
 - Lets SOL alone update durable context.
+- Safely initializes and validates the three persistent context files.
 
-To use it in another repository, copy the `agentmaxxing` skill folder into that
-repository’s `.agents/skills/` directory. The workflow remains a standalone
-skill; plugin packaging is intentionally out of scope.
+The workflow remains a standalone skill; plugin packaging is intentionally out
+of scope.
 
 ## ◫ Documentation map
 

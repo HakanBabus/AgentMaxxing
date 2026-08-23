@@ -50,11 +50,13 @@ conflicting status, unreviewed decisions, and noisy history.
 **Status:** Accepted
 **Date:** 2026-08-23
 
-**Decision:** AgentMaxxing v0.1 is a repo-scoped Codex skill under
-`.agents/skills/agentmaxxing/`. A Codex plugin is out of scope.
+**Decision:** AgentMaxxing is authored under `.agents/skills/agentmaxxing/` and
+may be installed as a personal Codex skill for cross-repository use. A Codex
+plugin is out of scope.
 
 **Reason:** The workflow needs reusable instructions and selective references,
 not connectors, distribution metadata, or an additional application runtime.
 
-**Consequences:** Development targets the skill format directly. Plugin
-packaging must not be added unless this decision is explicitly revisited.
+**Consequences:** The GitHub skill folder is the canonical source for both repo
+and personal installation. Plugin packaging must not be added unless this
+decision is explicitly revisited.

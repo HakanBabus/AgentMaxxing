@@ -8,6 +8,10 @@ Thumbs.db
 *.log
 tmp/
 
+# Python helper caches
+__pycache__/
+*.py[cod]
+
 # Future JavaScript/TypeScript tooling
 node_modules/
 dist/
@@ -15,4 +19,3 @@ coverage/
 .env
 .env.*
 !.env.example
-

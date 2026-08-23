@@ -6,7 +6,7 @@ AgentMaxxing
 
 ## Current goal
 
-Exercise the `$agentmaxxing` v0.1 skill on representative repository tasks.
+Make `$agentmaxxing` discoverable as a personal skill and verify real use.
 
 ## Completed
 
@@ -20,7 +20,7 @@ Exercise the `$agentmaxxing` v0.1 skill on representative repository tasks.
 
 ## Working
 
-- No implementation task is active.
+- Personal installation and end-to-end skill validation.
 
 ## Blocked
 
@@ -28,6 +28,6 @@ Exercise the `$agentmaxxing` v0.1 skill on representative repository tasks.
 
 ## Next
 
-- Exercise explicit and implicit skill activation on representative tasks.
+- Verify explicit and implicit activation from a different repository.
 - Define Phase 2 acceptance criteria before choosing an implementation stack.
 - Refine routing rules only from observed skill behavior.

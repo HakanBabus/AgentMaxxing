@@ -2,11 +2,11 @@
 
 ## Status
 
-Completed
+Executing
 
 ## Goal
 
-Create the standalone `$agentmaxxing` v0.1 Codex skill.
+Make `$agentmaxxing` visible as a personal skill and validate real use.
 
 ## Owner
 
@@ -16,34 +16,39 @@ SOL
 
 - `.agents/skills/agentmaxxing/`
 - `.agentmaxxing/`
+- `tests/`
 - `README.md`
+- `README.tr.md`
 
 ## Requirements
 
-- Provide a discoverable repo-scoped `SKILL.md`.
-- Preserve SOL/LUNA/TERRA role boundaries and compressed handoffs.
-- Load detailed contracts progressively.
-- Support minimal project context initialization and updates.
+- Preserve the standalone skill format without a plugin.
+- Support personal installation from the public GitHub repository.
+- Add deterministic context initialization and validation.
+- Verify structure, scripts, documentation, and installed content.
 
 ## Constraints
 
-- Do not create a Codex plugin, MCP server, CLI, or application runtime.
-- Do not add scripts without a deterministic need.
-- Keep automatic skill discovery enabled.
+- Do not overwrite existing project context during initialization.
+- Do not duplicate the skill under a second tracked source path.
+- Preserve user-authored documentation commits.
 
 ## Acceptance criteria
 
-- Skill structure passes the official skill validator.
+- Official skill validation passes.
+- Context helper tests pass on fresh, existing, and missing context.
 - Markdown lint and local-link checks pass.
-- Explicit `$agentmaxxing` invocation is represented in UI metadata.
-- Documentation and project state reflect the standalone skill decision.
+- Personal installation from GitHub succeeds.
+- Installed skill content matches the pushed canonical source.
 
 ## Progress
 
-- [x] Initialize the skill structure.
-- [x] Implement SOL routing and integration instructions.
-- [x] Add conditional task and context references.
-- [x] Update public documentation and durable project context.
+- [x] Diagnose repo-scoped versus personal discovery.
+- [x] Add explicit UI invocation policy.
+- [x] Add deterministic context helper and tests.
+- [x] Document personal installation and restart behavior.
+- [ ] Run all validation and push the canonical source.
+- [ ] Install from GitHub and verify the personal copy.
 
 ## Decisions needed
 

@@ -2,3 +2,7 @@ interface:
   display_name: "AgentMaxxing"
   short_description: "Orchestrate coding work with minimal context"
   default_prompt: "Use $agentmaxxing to coordinate this repository task with minimal context and selective specialist delegation."
+  brand_color: "#F59E0B"
+
+policy:
+  allow_implicit_invocation: true

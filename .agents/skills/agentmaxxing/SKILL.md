@@ -26,6 +26,16 @@ when the user asks to initialize AgentMaxxing or authorizes repository changes
 through a build, change, or fix request. For read-only requests, operate without
 creating files and mention that persistence was not initialized.
 
+For authorized initialization, prefer the bundled deterministic helper instead
+of recreating templates manually:
+
+```text
+python <skill-directory>/scripts/context.py init --root <repo-root> --project <project-name> --goal "<current goal>"
+```
+
+The helper creates missing files but never overwrites existing context. Inspect
+its output before continuing.
+
 ## Scope the outcome
 
 Determine the requested result, affected boundary, observable acceptance
@@ -78,6 +88,15 @@ SOL alone writes `.agentmaxxing/`. After validation:
 
 For exact update rules, read
 [references/context-system.md](references/context-system.md).
+
+Before reporting completion, validate the persistent structure when it exists:
+
+```text
+python <skill-directory>/scripts/context.py check --root <repo-root>
+```
+
+Treat a nonzero result as incomplete validation; repair only issues within the
+authorized scope.
 
 Return the integrated outcome to the user with changed artifacts, validation
 evidence, material caveats, and remaining work. Keep orchestration mechanics
