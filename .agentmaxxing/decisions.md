@@ -44,4 +44,3 @@ Specialists may recommend changes in their result reports.
 conflicting status, unreviewed decisions, and noisy history.
 
 **Consequences:** Context updates occur after SOL validates an integrated result.
-

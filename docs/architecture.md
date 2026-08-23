@@ -165,4 +165,3 @@ and compression. No module should require a vector database or transcript store.
 
 The concrete language and runtime will be selected only when Phase 2 acceptance
 criteria are defined; Phase 1 does not create a placeholder stack decision.
-

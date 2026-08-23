@@ -111,8 +111,25 @@ the only component responsible for user-facing integration and durable context;
 workers receive the smallest sufficient task context and do not write project
 memory independently.
 
-See [docs/architecture.md](docs/architecture.md) for boundaries, invariants,
-and failure modes.
+Core documentation:
+
+- [Architecture](docs/architecture.md) — boundaries, invariants, and failure
+  modes.
+- [Task protocol](docs/task-protocol.md) — task envelopes, result reports, and
+  lifecycle.
+- [Agent workflow](docs/workflow.md) — routing, execution, integration, and
+  measurement.
+
+## Start using the workflow
+
+1. Copy the `.agentmaxxing/` directory and `AGENTS.md` into a repository.
+2. Replace the example project state and active task with current truth.
+3. Keep SOL as the integration owner and delegate only bounded tasks.
+4. Use the task and result formats in the task protocol.
+5. Review and validate every specialist result before updating project state.
+
+This manual workflow is the Phase 1 reference implementation. Future tooling
+will automate it without changing its ownership and context guarantees.
 
 ## Roadmap
 
@@ -141,11 +158,15 @@ the preceding contracts have been exercised on representative tasks.
 
 Phase 1 is focused on the protocol and its invariants. Before proposing an
 automation layer, open a discussion that explains which manual failure it
-removes and how it preserves the minimal-context design.
+removes and how it preserves the minimal-context design. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow.
 
-Contribution instructions are added as part of the foundation milestone.
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Security concerns
+should use the private process in [SECURITY.md](SECURITY.md), not a public issue.
 
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
 
+AgentMaxxing is an independent open-source project and is not affiliated with
+or endorsed by OpenAI.

@@ -163,4 +163,3 @@ After successful validation, SOL:
 Independent tasks may run concurrently only when their owned paths and outputs
 do not overlap. If two tasks share a dependency, SOL must define ordering or a
 specific artifact handoff. Parallelism is an optimization, not a default.
-

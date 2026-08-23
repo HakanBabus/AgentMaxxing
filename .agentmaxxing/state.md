@@ -6,18 +6,19 @@ AgentMaxxing
 
 ## Current goal
 
-Establish the Phase 1 repository foundation and workflow contracts.
+Exercise the Phase 1 manual workflow and define Phase 2 acceptance criteria.
 
 ## Completed
 
 - Repository structure initialized.
 - Project vision and architecture documented.
+- Minimal persistent context system created.
+- Task lifecycle and agent communication formats defined.
+- Codex workflow and open-source contribution guidance added.
 
 ## Working
 
-- Minimal persistent context templates.
-- Agent task and report contracts.
-- Open-source contribution foundation.
+- No implementation task is active.
 
 ## Blocked
 
@@ -27,4 +28,4 @@ Establish the Phase 1 repository foundation and workflow contracts.
 
 - Exercise the manual workflow on representative tasks.
 - Define Phase 2 acceptance criteria before choosing an implementation stack.
-
+- Re-authenticate GitHub CLI and publish the repository when authorized.

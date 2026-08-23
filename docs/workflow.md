@@ -118,4 +118,3 @@ not conversation archives:
 
 A cheaper or faster route is better only when the final result still meets the
 same quality bar.
-

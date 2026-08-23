@@ -93,4 +93,3 @@ SOL is the sole logical writer of `.agentmaxxing/`.
 After integration, validate specialist claims against the acceptance criteria.
 Record `PASS` only with the exact command or check. Then update persistent context
 only if the current project truth changed.
-
