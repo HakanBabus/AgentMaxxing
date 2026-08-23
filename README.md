@@ -4,45 +4,46 @@
 >
 > Keep context small. Delegate with intent. Validate with evidence.
 
+**Languages:** [English](README.md) · [Türkçe](README.tr.md)
+
 ![Version](https://img.shields.io/badge/version-0.1-7c3aed?style=flat-square)
 ![Phase](https://img.shields.io/badge/phase-1%20foundation-0ea5e9?style=flat-square)
 [![License](https://img.shields.io/badge/license-Apache%202.0-f59e0b?style=flat-square)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-architecture-14b8a6?style=flat-square)](docs/architecture.md)
 
-AgentMaxxing, AI coding çalışmalarını küçük ve odaklı bir ekip gibi yürütmek
-için tasarlanmış açık bir workflow protokolüdür. Bir **SOL** ajanı hedefi ve
-proje durumunu korur; yalnızca gerçekten fayda sağlayan işleri **LUNA** ve
-**TERRA** uzmanlarına yönlendirir.
+AgentMaxxing is an open workflow protocol for running AI coding work like a
+small, focused team. A **SOL** agent keeps the goal and project state, then
+routes only the work that genuinely benefits from **LUNA** or **TERRA**.
 
-> **v0.1 durumu:** Repo-scoped Codex skill hazırdır. Runtime, CLI veya plugin
-> gerektirmez.
+> **v0.1 status:** The repo-scoped Codex skill is ready. No runtime, CLI, or
+> plugin is required.
 
-## ✦ Neyi çözer?
+## ✦ What problem does it solve?
 
-Uzun AI coding oturumlarında aynı problemler tekrar eder: gereksiz repository
-dump'ları, belirsiz görevler, bayat kararlar ve doğrulanmamış “tamamlandı”
-iddiaları. AgentMaxxing bu akışı dört net kuralla sadeleştirir.
+Long AI coding sessions tend to accumulate repository dumps, vague tasks, stale
+decisions, and unverified “done” claims. AgentMaxxing simplifies that workflow
+with four explicit rules.
 
-| Sık görülen sorun | AgentMaxxing yaklaşımı |
+| Common problem | AgentMaxxing approach |
 | --- | --- |
-| Bağlam büyür, önemli bilgi kaybolur | Yalnızca **güncel durum**, **kalıcı kararlar** ve **aktif görev** saklanır |
-| Delegasyon hedefi belirsizdir | Her iş için kapsamı ve başarı ölçütleri belli bir **task envelope** hazırlanır |
-| Test iddiaları kanıtsız kalır | Her `PASS`, çalıştırılan kesin komut veya kontrol ile raporlanır |
-| Sorumluluk ajanlar arasında dağılır | Delegasyon işi aktarır; **son sahiplik SOL’da kalır** |
+| Context grows until important information gets lost | Keep only **current state**, **durable decisions**, and the **active task** |
+| Delegation goals are vague | Define a bounded **task envelope** with scope and acceptance criteria |
+| Test claims lack evidence | Every `PASS` includes the exact command or check that produced it |
+| Responsibility is split across agents | Delegation transfers work; **SOL keeps final ownership** |
 
-## ◈ Bir bakışta mimari
+## ◈ Architecture at a glance
 
 ```mermaid
 flowchart LR
-    U([Kullanıcı isteği]) --> S["SOL<br/>kapsam + yönlendirme"]
-    S --> D{"Delegasyon<br/>değer katıyor mu?"}
-    D -- "Hayır" --> W["SOL doğrudan<br/>uygular"]
-    D -- "Uygulama" --> L["LUNA<br/>sınırlı implementasyon"]
-    D -- "İnceleme" --> T["TERRA<br/>bağımsız challenge"]
-    W --> V["SOL doğrular<br/>ve entegre eder"]
+    U([User request]) --> S["SOL<br/>scope + routing"]
+    S --> D{"Does delegation<br/>add value?"}
+    D -- "No" --> W["SOL works<br/>directly"]
+    D -- "Implementation" --> L["LUNA<br/>bounded execution"]
+    D -- "Review" --> T["TERRA<br/>independent challenge"]
+    W --> V["SOL validates<br/>and integrates"]
     L --> V
     T --> S
-    V --> P[(".agentmaxxing<br/>kalıcı context")]
+    V --> P[(".agentmaxxing<br/>durable context")]
 
     classDef sol fill:#ede9fe,stroke:#7c3aed,color:#2e1065
     classDef luna fill:#dcfce7,stroke:#16a34a,color:#14532d
@@ -52,27 +53,27 @@ flowchart LR
     class T terra
 ```
 
-### Üç rol, üç net sorumluluk
+### Three roles, three clear responsibilities
 
-| Rol | Ne zaman devreye girer? | Koruduğu sınır |
+| Role | When it steps in | Boundary it protects |
 | --- | --- | --- |
-| **SOL** | Her isteğin başında ve sonunda | Hedef, entegrasyon ve nihai kalite |
-| **LUNA** | Kapsamı dar, implementasyonu ölçülebilir işlerde | Yalnızca verilen dosya ve acceptance kriterleri |
-| **TERRA** | Mimari meydan okuma, belirsiz root-cause veya risk incelemesinde | Analiz yapar; ayrı yetki verilmedikçe dosya değiştirmez |
+| **SOL** | At the start and end of every request | Goal, integration, and final quality |
+| **LUNA** | For narrow, measurable implementation work | Only the assigned files and acceptance criteria |
+| **TERRA** | For architecture challenges, uncertain root causes, or risk review | Analysis only unless separate authority is granted |
 
-Rol isimleri kalıcı sorumlulukları ifade eder; belirli bir model adına kilitli
-değildir. Model ve reasoning seviyesi, yetenek, maliyet ve ölçülen sonuçlara göre
-değiştirilebilir.
+Role names describe stable responsibilities, not a permanent model lock. Model
+and reasoning-level mappings can change with capability, cost, and measured
+results.
 
-## ⟳ İş akışı
+## ⟳ Workflow
 
 ```mermaid
 flowchart TD
     A[Requested] --> B[Scoped]
     B --> C{Route}
-    C -->|Küçük / sıkı bağlı| D[Assigned to SOL]
-    C -->|Sınırlı implementasyon| E[Assigned to LUNA]
-    C -->|Bağımsız inceleme| F[Assigned to TERRA]
+    C -->|Small / tightly coupled| D[Assigned to SOL]
+    C -->|Bounded implementation| E[Assigned to LUNA]
+    C -->|Independent review| F[Assigned to TERRA]
     D --> G[Executing]
     E --> G
     F --> G
@@ -83,55 +84,55 @@ flowchart TD
     K --> B
 ```
 
-### Akışın kısa versiyonu
+### The short version
 
-1. **SOL bağlamı seçer:** Önce `.agentmaxxing/state.md`, gerekiyorsa aktif görev
-   ve mimari kararlar okunur.
-2. **İş sınıflandırılır:** Kapsam, kabul ölçütleri, dosya sahipliği ve onay
-   sınırları netleştirilir.
-3. **Doğru rota seçilir:** Küçük işler SOL’da kalır; bounded implementation
-   LUNA’ya, bağımsız challenge TERRA’ya gider.
-4. **Handoff sıkıştırılır:** Uzman yalnızca değişiklik, sonuç, test kanıtı ve
-   kalan işleri raporlar.
-5. **SOL doğrular:** Rapor özet olarak kabul edilir; gerçek dosyalar ve kritik
-   kontroller yeniden incelenir.
-6. **Yalnızca değişen gerçek saklanır:** Kalıcı context, doğrulama sonrasında
-   güncellenir.
+1. **SOL selects context:** Start with `.agentmaxxing/state.md`; load the active
+   task and architectural decisions only when needed.
+2. **Classify the work:** Make scope, acceptance criteria, file ownership, and
+   approval boundaries explicit.
+3. **Choose the route:** Keep small work with SOL; send bounded implementation
+   to LUNA and independent challenges to TERRA.
+4. **Compress the handoff:** The specialist reports changes, outcomes, test
+   evidence, and remaining work.
+5. **SOL validates:** Treat the report as an index; inspect the actual files and
+   rerun critical checks.
+6. **Persist changed truth only:** Update durable context after validation.
 
-## ▣ Küçük ama kalıcı context
+## ▣ Small, durable context
 
 ```text
 .agentmaxxing/
-├── state.md              # Şu an neredeyiz?
-├── decisions.md          # Neyi kalıcı olarak kararlaştırdık?
+├── state.md              # Where are we now?
+├── decisions.md          # What durable decisions have we made?
 └── tasks/
-    └── current.md        # Şu anki tek entegrasyon görevi
+    └── current.md        # The single active integration task
 ```
 
-Bu klasör bir konuşma arşivi değildir. **SOL tek mantıksal yazardır**; uzmanlar
-yalnızca raporlarında context güncellemesi önerebilir. Ham reasoning trace'leri,
-tam transcript'ler ve rutin ilerleme notları kalıcı context'e yazılmaz.
+This directory is not a conversation archive. **SOL is the sole logical writer**;
+specialists may only propose context updates in their reports. Raw reasoning
+traces, full transcripts, and routine progress notes do not enter durable
+context.
 
-## ✉ Görev handoff'u nasıl görünür?
+## ✉ What does a task handoff look like?
 
-### 1. SOL → uzman: task envelope
+### 1. SOL → specialist: task envelope
 
 ```markdown
 Role: LUNA
-Goal: Süresi dolmuş refresh token'ları rotation öncesinde reddet.
+Goal: Reject expired refresh tokens before rotation.
 Scope:
 - src/auth/token.ts
 - tests/auth/token.test.ts
 Requirements:
-- Geçerli ve süresi dolmuş token senaryolarını kapsa.
+- Cover valid and expired token scenarios.
 Constraints:
-- Public API ve session storage davranışını koru.
+- Preserve the public API and session storage behavior.
 Acceptance:
-- Hedef testler geçsin.
-- Mevcut auth testleri yeşil kalsın.
+- Targeted tests pass.
+- Existing auth tests remain green.
 ```
 
-### 2. Uzman → SOL: sıkıştırılmış result report
+### 2. Specialist → SOL: compressed result report
 
 ```markdown
 Changed:
@@ -139,7 +140,7 @@ Changed:
 - tests/auth/token.test.ts
 
 Fixed:
-- Süresi dolmuş refresh token'lar rotation öncesinde reddediliyor.
+- Expired refresh tokens are rejected before rotation.
 
 Tests:
 - PASS — npm test -- tests/auth/token.test.ts
@@ -151,54 +152,54 @@ Decision needed:
 - None
 ```
 
-Bir görev ancak **Role**, **Goal**, **Scope**, **Requirements**, **Constraints**
-ve **Acceptance** alanları biliniyorsa atanır. Böylece uzman, tüm repository’yi
-yeniden keşfetmek zorunda kalmaz.
+A task is ready to assign only when **Role**, **Goal**, **Scope**,
+**Requirements**, **Constraints**, and **Acceptance** are known. This prevents
+the specialist from rediscovering the entire repository.
 
-## ⌁ Temel invariants
+## ⌁ Core invariants
 
-| İlke | Pratik sonucu |
+| Principle | Practical consequence |
 | --- | --- |
-| **SOL remains accountable** | Delegasyon final sahipliği devretmez |
-| **Context is selected** | Ajanlara yalnızca yeterli dosya ve kısıt verilir |
-| **Scopes do not overlap** | Aynı dosyada eşzamanlı ve belirsiz sahiplik oluşmaz |
-| **Claims are verifiable** | `PASS` raporu kesin komut veya check içerir |
-| **Roles are model-independent** | Model değişse de sorumluluk sözleşmesi korunur |
-| **Permissions do not expand** | Uzman, SOL’dan veya kullanıcıdan daha geniş yetkiye sahip olmaz |
+| **SOL remains accountable** | Delegation never transfers final ownership |
+| **Context is selected** | Agents receive only sufficient files and constraints |
+| **Scopes do not overlap** | Concurrent work has explicit file ownership |
+| **Claims are verifiable** | A `PASS` report includes an exact command or check |
+| **Roles are model-independent** | Responsibility contracts survive model changes |
+| **Permissions do not expand** | A specialist never receives broader authority than SOL or the user |
 
-## 🚀 Başlangıç
+## 🚀 Getting started
 
-Bu repository’de kullanılabilir referans uygulama, repo-scoped
-[`$agentmaxxing` skill’idir](.agents/skills/agentmaxxing/SKILL.md).
+The reference implementation in this repository is the repo-scoped
+[`$agentmaxxing` skill](.agents/skills/agentmaxxing/SKILL.md).
 
-Codex içinde somut bir repository göreviyle çağırın:
+Invoke it from Codex with a concrete repository task:
 
 ```text
-$agentmaxxing .agentmaxxing/tasks/current.md içindeki bounded görevi uygula
+$agentmaxxing implement the bounded task in .agentmaxxing/tasks/current.md
 ```
 
-Skill şu davranışları destekler:
+The skill:
 
-- Proje durumunu seçerek yükler.
-- Delegasyonun gerçekten değer katıp katmadığını değerlendirir.
-- Uzmanlara küçük ve ölçülebilir task envelope’lar gönderir.
-- Handoff’ları acceptance kriterlerine karşı doğrular.
-- Kalıcı context’i yalnızca SOL’un güncellemesine izin verir.
+- Loads project state selectively.
+- Decides whether delegation adds enough value.
+- Gives specialists small, measurable task envelopes.
+- Validates handoffs against acceptance criteria.
+- Lets SOL alone update durable context.
 
-Başka bir repository’de kullanmak için `agentmaxxing` skill klasörünü o
-repository’nin `.agents/skills/` dizinine kopyalayın. Workflow bağımsız bir skill
-olarak kalır; plugin paketlemesi bilerek kapsam dışındadır.
+To use it in another repository, copy the `agentmaxxing` skill folder into that
+repository’s `.agents/skills/` directory. The workflow remains a standalone
+skill; plugin packaging is intentionally out of scope.
 
-## ◫ Dokümantasyon haritası
+## ◫ Documentation map
 
-| Belge | İçerik |
+| Document | Covers |
 | --- | --- |
-| [Architecture](docs/architecture.md) | Sınırlar, bileşenler, invariants ve failure modes |
-| [Task protocol](docs/task-protocol.md) | Task envelope, result report ve lifecycle sözleşmesi |
-| [Agent workflow](docs/workflow.md) | Routing, execution, validation ve ölçüm yaklaşımı |
-| [Repo skill](.agents/skills/agentmaxxing/SKILL.md) | Codex’in uyguladığı operasyonel talimatlar |
-| [Contributing](CONTRIBUTING.md) | Geliştirme ve katkı akışı |
-| [Security](SECURITY.md) | Güvenlik bildirim süreci |
+| [Architecture](docs/architecture.md) | Boundaries, components, invariants, and failure modes |
+| [Task protocol](docs/task-protocol.md) | Task envelopes, result reports, and lifecycle contracts |
+| [Agent workflow](docs/workflow.md) | Routing, execution, validation, and measurement |
+| [Repo skill](.agents/skills/agentmaxxing/SKILL.md) | Operational instructions used by Codex |
+| [Contributing](CONTRIBUTING.md) | Development and contribution workflow |
+| [Security](SECURITY.md) | Private security reporting process |
 
 ## 🗺 Roadmap
 
@@ -209,31 +210,31 @@ Phase 3  Routing          ░░░░░░░░░░░░░░░░░░
 Phase 4  Optimization     ░░░░░░░░░░░░░░░░░░░░  Planned
 ```
 
-- **Phase 1 — Foundation:** Repository yapısı, dokümanlar, context şablonları,
-  workflow sözleşmeleri ve v0.1 Codex skill’i. **Tamamlandı.**
-- **Phase 2 — Core system:** Task manager, state manager, context loader ve
-  machine-readable agent mesajları.
-- **Phase 3 — Routing:** Evidence-based SOL/LUNA/TERRA seçimi ve delegasyon
-  kuralları.
-- **Phase 4 — Optimization:** Token bütçeleri, context compression ve routing
-  değerlendirmesi.
+- **Phase 1 — Foundation:** Repository structure, documentation, context
+  templates, workflow contracts, and the v0.1 Codex skill. **Complete.**
+- **Phase 2 — Core system:** Task manager, state manager, context loader, and
+  machine-readable agent messages.
+- **Phase 3 — Routing:** Evidence-based SOL/LUNA/TERRA selection and delegation
+  rules.
+- **Phase 4 — Optimization:** Token budgets, context compression, and routing
+  evaluation.
 
-Her faz acceptance-driven ilerler. Yeni faz, önceki fazın sözleşmeleri temsili
-görevlerle sınanmadan başlamaz.
+Each phase is acceptance-driven. A new phase starts only after the previous
+phase’s contracts have been exercised on representative tasks.
 
-## 🤝 Katkı ve sınırlar
+## 🤝 Contributing and boundaries
 
-Phase 1 odağı protocol ve invariants’tır. Bir automation layer önermeden önce,
-hangi manuel hatayı ortadan kaldırdığını ve minimal-context tasarımını nasıl
-koruduğunu açıklayan bir discussion açın.
+Phase 1 focuses on the protocol and its invariants. Before proposing an
+automation layer, open a discussion explaining which manual failure it removes
+and how it preserves the minimal-context design.
 
-Katkı süreci için [CONTRIBUTING.md](CONTRIBUTING.md), topluluk kuralları için
-[Code of Conduct](CODE_OF_CONDUCT.md) ve güvenlik bildirimleri için
-[SECURITY.md](SECURITY.md) dosyasına bakın.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow, the
+[Code of Conduct](CODE_OF_CONDUCT.md) for community rules, and
+[SECURITY.md](SECURITY.md) for security reports.
 
-## Lisans
+## License
 
-[Apache License 2.0](LICENSE) ile lisanslanmıştır.
+Licensed under the [Apache License 2.0](LICENSE).
 
-AgentMaxxing bağımsız bir açık kaynak projesidir; OpenAI ile bağlantılı veya
-OpenAI tarafından onaylanmış değildir.
+AgentMaxxing is an independent open-source project and is not affiliated with
+or endorsed by OpenAI.
