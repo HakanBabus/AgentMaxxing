@@ -1,0 +1,4 @@
+interface:
+  display_name: "AgentMaxxing"
+  short_description: "Orchestrate coding work with minimal context"
+  default_prompt: "Use $agentmaxxing to coordinate this repository task with minimal context and selective specialist delegation."

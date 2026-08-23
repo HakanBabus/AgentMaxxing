@@ -6,7 +6,7 @@ Completed
 
 ## Goal
 
-Complete the AgentMaxxing Phase 1 foundation.
+Create the standalone `$agentmaxxing` v0.1 Codex skill.
 
 ## Owner
 
@@ -14,42 +14,36 @@ SOL
 
 ## Affected paths
 
+- `.agents/skills/agentmaxxing/`
 - `.agentmaxxing/`
-- `.github/`
-- `docs/`
-- `AGENTS.md`
-- `CONTRIBUTING.md`
 - `README.md`
 
 ## Requirements
 
-- Define a minimal, model-independent orchestration protocol.
-- Provide open-source project and contribution guidance.
-- Create task and result message contracts.
-- Keep the repository free of premature runtime code.
-- Commit each meaningful foundation step separately.
+- Provide a discoverable repo-scoped `SKILL.md`.
+- Preserve SOL/LUNA/TERRA role boundaries and compressed handoffs.
+- Load detailed contracts progressively.
+- Support minimal project context initialization and updates.
 
 ## Constraints
 
-- Do not store conversation transcripts or low-level activity logs.
-- Do not introduce a vector database or an application stack in Phase 1.
-- Do not publish externally without a valid authenticated GitHub session.
+- Do not create a Codex plugin, MCP server, CLI, or application runtime.
+- Do not add scripts without a deterministic need.
+- Keep automatic skill discovery enabled.
 
 ## Acceptance criteria
 
-- Repository documents agree on role boundaries and task lifecycle.
-- Minimal context files answer current state, durable decisions, and active task.
-- Markdown and repository checks pass.
-- Git history contains small, meaningful commits.
+- Skill structure passes the official skill validator.
+- Markdown lint and local-link checks pass.
+- Explicit `$agentmaxxing` invocation is represented in UI metadata.
+- Documentation and project state reflect the standalone skill decision.
 
 ## Progress
 
-- [x] Initialize repository structure.
-- [x] Document vision and architecture.
-- [x] Create minimal context files.
-- [x] Add task management foundation.
-- [x] Add agent workflow guidance.
-- [x] Complete final documentation and quality review.
+- [x] Initialize the skill structure.
+- [x] Implement SOL routing and integration instructions.
+- [x] Add conditional task and context references.
+- [x] Update public documentation and durable project context.
 
 ## Decisions needed
 

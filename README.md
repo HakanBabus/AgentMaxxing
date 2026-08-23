@@ -2,8 +2,8 @@
 
 **Cost-efficient multi-agent orchestration workflow for Codex.**
 
-> Status: Phase 1 — foundation and workflow design. No runtime or CLI is
-> published yet.
+> Status: v0.1 — repository-scoped Codex skill available. No runtime, CLI, or
+> plugin is required.
 
 AgentMaxxing is a small, explicit protocol for running AI coding work like a
 focused development team. A primary agent keeps the goal and project state,
@@ -122,19 +122,27 @@ Core documentation:
 
 ## Start using the workflow
 
-1. Copy the `.agentmaxxing/` directory and `AGENTS.md` into a repository.
-2. Replace the example project state and active task with current truth.
-3. Keep SOL as the integration owner and delegate only bounded tasks.
-4. Use the task and result formats in the task protocol.
-5. Review and validate every specialist result before updating project state.
+The v0.1 reference implementation is the repo-scoped
+[`$agentmaxxing` skill](.agents/skills/agentmaxxing/SKILL.md). Invoke it from
+Codex with a concrete repository task:
 
-This manual workflow is the Phase 1 reference implementation. Future tooling
-will automate it without changing its ownership and context guarantees.
+```text
+$agentmaxxing implement the bounded task in .agentmaxxing/tasks/current.md
+```
+
+Codex can also select the skill implicitly for substantial orchestration work.
+The skill loads project state selectively, decides whether delegation adds
+value, gives specialists compressed task envelopes, validates their handoffs,
+and lets SOL alone update persistent context.
+
+To use it in another repository, install or copy the `agentmaxxing` skill folder
+into that repository's `.agents/skills/` directory. The workflow remains a
+standalone skill; a plugin is intentionally out of scope.
 
 ## Roadmap
 
 - **Phase 1 — Foundation:** repository structure, documentation, context
-  templates, and workflow contracts.
+  templates, workflow contracts, and the v0.1 Codex skill. **Complete.**
 - **Phase 2 — Core system:** task manager, state manager, context loader, and
   machine-readable agent messages.
 - **Phase 3 — Routing:** evidence-based SOL/LUNA/TERRA selection and delegation

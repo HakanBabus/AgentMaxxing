@@ -6,7 +6,7 @@ AgentMaxxing
 
 ## Current goal
 
-Exercise the Phase 1 manual workflow and define Phase 2 acceptance criteria.
+Exercise the `$agentmaxxing` v0.1 skill on representative repository tasks.
 
 ## Completed
 
@@ -15,6 +15,8 @@ Exercise the Phase 1 manual workflow and define Phase 2 acceptance criteria.
 - Minimal persistent context system created.
 - Task lifecycle and agent communication formats defined.
 - Codex workflow and open-source contribution guidance added.
+- Repo-scoped `$agentmaxxing` v0.1 skill implemented.
+- Public GitHub repository published.
 
 ## Working
 
@@ -22,10 +24,10 @@ Exercise the Phase 1 manual workflow and define Phase 2 acceptance criteria.
 
 ## Blocked
 
-- GitHub repository publication requires an authenticated GitHub CLI session.
+- None.
 
 ## Next
 
-- Exercise the manual workflow on representative tasks.
+- Exercise explicit and implicit skill activation on representative tasks.
 - Define Phase 2 acceptance criteria before choosing an implementation stack.
-- Re-authenticate GitHub CLI and publish the repository when authorized.
+- Refine routing rules only from observed skill behavior.

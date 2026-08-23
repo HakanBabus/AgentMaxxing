@@ -44,3 +44,17 @@ Specialists may recommend changes in their result reports.
 conflicting status, unreviewed decisions, and noisy history.
 
 **Consequences:** Context updates occur after SOL validates an integrated result.
+
+## D-004 — Ship as a standalone Codex skill
+
+**Status:** Accepted
+**Date:** 2026-08-23
+
+**Decision:** AgentMaxxing v0.1 is a repo-scoped Codex skill under
+`.agents/skills/agentmaxxing/`. A Codex plugin is out of scope.
+
+**Reason:** The workflow needs reusable instructions and selective references,
+not connectors, distribution metadata, or an additional application runtime.
+
+**Consequences:** Development targets the skill format directly. Plugin
+packaging must not be added unless this decision is explicitly revisited.
