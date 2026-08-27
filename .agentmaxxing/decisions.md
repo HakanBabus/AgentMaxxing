@@ -60,3 +60,19 @@ not connectors, distribution metadata, or an additional application runtime.
 **Consequences:** The GitHub skill folder is the canonical source for both repo
 and personal installation. Plugin packaging must not be added unless this
 decision is explicitly revisited.
+
+## D-005 — Require explicit skill invocation
+
+**Status:** Accepted
+**Date:** 2026-08-27
+
+**Decision:** Set `policy.allow_implicit_invocation` to `false`. AgentMaxxing
+starts only when the user invokes `$agentmaxxing` or explicitly selects the
+skill.
+
+**Reason:** Orchestration should be intentional. Ordinary repository requests
+must not acquire delegation, context loading, or workflow overhead
+automatically.
+
+**Consequences:** Codex does not select AgentMaxxing implicitly. Users must
+request it explicitly whenever they want the SOL/LUNA/TERRA workflow.

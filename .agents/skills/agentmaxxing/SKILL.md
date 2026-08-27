@@ -1,6 +1,6 @@
 ---
 name: agentmaxxing
-description: "Orchestrate substantial Codex repository work with minimal persistent context, selective SOL/LUNA/TERRA delegation, compressed handoffs, and final validation. Use when the user explicitly invokes $agentmaxxing, asks to use AgentMaxxing, or wants a multi-step coding task coordinated without context pollution. Do not use for trivial one-step requests where orchestration adds no value."
+description: "Orchestrate substantial Codex repository work with minimal persistent context, selective SOL/LUNA/TERRA delegation, compressed handoffs, and final validation. Use only when the user explicitly invokes $agentmaxxing or explicitly asks to use the AgentMaxxing skill. Do not activate implicitly for ordinary repository tasks."
 ---
 
 # AgentMaxxing

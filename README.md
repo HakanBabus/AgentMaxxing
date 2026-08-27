@@ -195,6 +195,10 @@ Invoke it from Codex with a concrete repository task:
 $agentmaxxing implement the bounded task in .agentmaxxing/tasks/current.md
 ```
 
+AgentMaxxing uses **explicit invocation only**. Codex will not select the skill
+automatically for ordinary repository tasks; start the request with
+`$agentmaxxing` or select the skill explicitly when you want the workflow.
+
 The skill:
 
 - Loads project state selectively.

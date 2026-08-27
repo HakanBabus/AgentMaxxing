@@ -6,7 +6,7 @@ Completed
 
 ## Goal
 
-Make `$agentmaxxing` visible as a personal skill and validate real use.
+Require explicit `$agentmaxxing` invocation in repository and personal scopes.
 
 ## Owner
 
@@ -16,39 +16,36 @@ SOL
 
 - `.agents/skills/agentmaxxing/`
 - `.agentmaxxing/`
-- `tests/`
 - `README.md`
 - `README.tr.md`
 
 ## Requirements
 
-- Preserve the standalone skill format without a plugin.
-- Support personal installation from the public GitHub repository.
-- Add deterministic context initialization and validation.
-- Verify structure, scripts, documentation, and installed content.
+- Disable implicit activation through the supported skill policy.
+- Keep `$agentmaxxing` and explicit UI selection available.
+- Synchronize the canonical and personal skill copies.
+- Document the explicit-only behavior in both languages.
 
 ## Constraints
 
-- Do not overwrite existing project context during initialization.
-- Do not duplicate the skill under a second tracked source path.
-- Preserve user-authored documentation commits.
+- Preserve the standalone skill format without a plugin.
+- Do not change routing behavior after the skill is explicitly invoked.
+- Keep the GitHub skill folder as the canonical tracked source.
 
 ## Acceptance criteria
 
-- Official skill validation passes.
-- Context helper tests pass on fresh, existing, and missing context.
-- Markdown lint and local-link checks pass.
-- Personal installation from GitHub succeeds.
-- Installed skill content matches the pushed canonical source.
+- `policy.allow_implicit_invocation` is `false` in both skill copies.
+- Official skill validation passes for canonical and personal installations.
+- Documentation and context checks pass.
+- Installed tracked skill content matches the canonical source.
 
 ## Progress
 
-- [x] Diagnose repo-scoped versus personal discovery.
-- [x] Add explicit UI invocation policy.
-- [x] Add deterministic context helper and tests.
-- [x] Document personal installation and restart behavior.
-- [x] Run all validation and push the canonical source.
-- [x] Install from GitHub and verify the personal copy.
+- [x] Confirm the supported explicit-only invocation policy.
+- [x] Disable implicit invocation in canonical and personal metadata.
+- [x] Narrow the skill description to explicit requests.
+- [x] Document the behavior in English and Turkish.
+- [x] Run validation and publish the canonical update.
 
 ## Decisions needed
 

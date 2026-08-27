@@ -197,6 +197,10 @@ Codex içinde somut bir repository göreviyle çağırın:
 $agentmaxxing .agentmaxxing/tasks/current.md içindeki bounded görevi uygula
 ```
 
+AgentMaxxing **yalnızca açık çağrıyla** çalışır. Codex, normal repository
+görevlerinde skill’i otomatik olarak seçmez; workflow’u kullanmak istediğinizde
+isteği `$agentmaxxing` ile başlatın veya skill’i arayüzden açıkça seçin.
+
 Skill şu davranışları destekler:
 
 - Proje durumunu seçerek yükler.

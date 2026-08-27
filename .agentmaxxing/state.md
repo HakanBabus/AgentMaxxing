@@ -6,7 +6,7 @@ AgentMaxxing
 
 ## Current goal
 
-Make `$agentmaxxing` discoverable as a personal skill and verify real use.
+Keep `$agentmaxxing` available only through explicit invocation.
 
 ## Completed
 
@@ -19,6 +19,7 @@ Make `$agentmaxxing` discoverable as a personal skill and verify real use.
 - Public GitHub repository published.
 - Personal `$agentmaxxing` installation completed from the canonical GitHub source.
 - Installed context initialization and validation flow smoke-tested.
+- Implicit skill invocation disabled in both canonical and personal installations.
 
 ## Working
 
@@ -30,6 +31,6 @@ Make `$agentmaxxing` discoverable as a personal skill and verify real use.
 
 ## Next
 
-- Exercise explicit and implicit activation on real repository work.
+- Exercise explicit activation on real repository work.
 - Define Phase 2 acceptance criteria before choosing an implementation stack.
 - Refine routing rules only from observed skill behavior.
