@@ -1,261 +1,348 @@
-# AgentMaxxing
+<div align="center">
 
-> **Cost-efficient multi-agent orchestration for Codex**
->
-> Keep context small. Delegate with intent. Validate with evidence.
+# ⚡ AgentMaxxing
 
-**Languages:** [English](README.md) · [Türkçe](README.tr.md)
+### Keep the main agent sharp. Push heavy work outward.
 
-![Version](https://img.shields.io/badge/version-0.1-7c3aed?style=flat-square)
-![Phase](https://img.shields.io/badge/phase-1%20foundation-0ea5e9?style=flat-square)
-[![License](https://img.shields.io/badge/license-Apache%202.0-f59e0b?style=flat-square)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-architecture-14b8a6?style=flat-square)](docs/architecture.md)
+**Context-efficient delegation for Codex-style coding workflows.**
 
-AgentMaxxing is an open workflow protocol for running AI coding work like a
-small, focused team. A **SOL** agent keeps the goal and project state, then
-routes only the work that genuinely benefits from **LUNA** or **TERRA**.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+![Status](https://img.shields.io/badge/status-experimental-orange)
+![Workers](https://img.shields.io/badge/workers-LUNA-7c3aed)
+![Design](https://img.shields.io/badge/design-context--first-0ea5e9)
 
-> **v0.1 status:** The repo-scoped Codex skill is ready. No runtime, CLI, or
-> plugin is required.
+[English](README.md) · [Türkçe](README_TR.md)
 
-## ✦ What problem does it solve?
+</div>
 
-Long AI coding sessions tend to accumulate repository dumps, vague tasks, stale
-decisions, and unverified “done” claims. AgentMaxxing simplifies that workflow
-with four explicit rules.
+---
 
-| Common problem | AgentMaxxing approach |
-| --- | --- |
-| Context grows until important information gets lost | Keep only **current state**, **durable decisions**, and the **active task** |
-| Delegation goals are vague | Define a bounded **task envelope** with scope and acceptance criteria |
-| Test claims lack evidence | Every `PASS` includes the exact command or check that produced it |
-| Responsibility is split across agents | Delegation transfers work; **SOL keeps final ownership** |
+AgentMaxxing is a lightweight orchestration skill built around one idea:
 
-## ◈ Architecture at a glance
+> **The main agent should keep the goal, decisions, and integration context — not every log, file, exploration path, and intermediate detail.**
+
+The main agent stays responsible for planning and final integration. Heavy or isolated work can be delegated to **LUNA workers** using small, explicit task packets. Workers return compact, verifiable handoffs instead of dumping their full context back into the main session.
+
+AgentMaxxing does **not** try to maximize the number of agents. It tries to minimize duplicated context.
+
+## ✦ The core model
 
 ```mermaid
 flowchart LR
-    U([User request]) --> S["SOL<br/>scope + routing"]
-    S --> D{"Does delegation<br/>add value?"}
-    D -- "No" --> W["SOL works<br/>directly"]
-    D -- "Implementation" --> L["LUNA<br/>bounded execution"]
-    D -- "Review" --> T["TERRA<br/>independent challenge"]
-    W --> V["SOL validates<br/>and integrates"]
-    L --> V
-    T --> S
-    V --> P[(".agentmaxxing<br/>durable context")]
-
-    classDef sol fill:#ede9fe,stroke:#7c3aed,color:#2e1065
-    classDef luna fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef terra fill:#ffedd5,stroke:#ea580c,color:#7c2d12
-    class S,W,V sol
-    class L luna
-    class T terra
+    U([User]) --> M["MAIN AGENT<br/>goal · plan · integration"]
+    M --> R{"Delegation useful?"}
+    R -- No --> D["Work directly"]
+    R -- Yes --> P["Build precise<br/>worker packet"]
+    P --> W1["LUNA worker"]
+    P --> W2["LUNA worker"]
+    P --> WN["LUNA worker …"]
+    W1 --> H["Compact handoff"]
+    W2 --> H
+    WN --> H
+    H --> M
+    D --> M
 ```
 
-### Three roles, three clear responsibilities
+There is **no arbitrary one-worker cap**. Open as many workers as the task genuinely benefits from — but only when their responsibilities are independent enough to avoid duplicated reading and conflicting edits.
 
-| Role | When it steps in | Boundary it protects |
-| --- | --- | --- |
-| **SOL** | At the start and end of every request | Goal, integration, and final quality |
-| **LUNA** | For narrow, measurable implementation work | Only the assigned files and acceptance criteria |
-| **TERRA** | For architecture challenges, uncertain root causes, or risk review | Analysis only unless separate authority is granted |
+The default bias is still conservative:
 
-Role names describe stable responsibilities, not a permanent model lock. Model
-and reasoning-level mappings can change with capability, cost, and measured
-results.
+- tiny task → main handles it
+- one heavy bounded task → one worker
+- several independent heavy tasks → several workers
+- tightly coupled tasks → keep sequential
+- same files / same investigation duplicated across workers → avoid
 
-## ⟳ Workflow
+## ◈ Why this exists
+
+Long coding sessions often become expensive and fragile for a simple reason: too much material accumulates in the primary session.
+
+Examples:
+
+- giant logs
+- broad repository exploration
+- repeated test output
+- large source files
+- research dumps
+- build failures
+- several implementation branches
+- verbose agent reports
+
+AgentMaxxing treats the main context as a scarce resource.
+
+| Without context discipline | With AgentMaxxing |
+| --- | --- |
+| Main reads everything | Main reads the minimum needed to route and integrate |
+| Workers rediscover the project | Workers receive a scoped packet |
+| Same task gets analyzed repeatedly | Ownership is explicit |
+| Worker sends a long transcript back | Worker sends a compact result |
+| Reviewer agent is opened by default | Worker self-checks first |
+| Parallelism is used because it exists | Parallelism is used only when work is independent |
+
+## 🧠 Roles
+
+### MAIN — orchestrator
+
+The main agent owns:
+
+- user intent
+- architecture-level decisions
+- task decomposition
+- worker selection
+- conflict avoidance
+- final integration
+- final answer
+
+The main agent should avoid loading heavy material that a worker can inspect independently.
+
+### LUNA — isolated worker
+
+LUNA is intentionally treated as an **execution worker, not a vague autonomous teammate**.
+
+LUNA works best when the main agent gives it a precise packet containing:
+
+1. **Goal** — one concrete outcome.
+2. **Why this is delegated** — what heavy context should remain isolated.
+3. **Inputs** — exact files, commands, logs, URLs, or directories that matter.
+4. **Scope** — what it may change or inspect.
+5. **Steps** — a short suggested path when the task is non-trivial.
+6. **Constraints** — APIs, dependencies, behavior, style, or files that must remain untouched.
+7. **Done when** — measurable acceptance criteria.
+8. **Validation** — exact tests/checks when known.
+9. **Return format** — compact handoff only.
+
+Recommended worker profile when available:
+
+```text
+model: gpt-5.6-luna
+reasoning: xhigh
+```
+
+The higher reasoning level compensates for the worker receiving less broad context. The main agent should improve the packet before adding more context.
+
+## ✉ Worker packet
+
+A good packet is intentionally boring and explicit:
+
+```markdown
+Role: LUNA worker
+
+Goal:
+Fix the stale profile request race condition.
+
+Why delegated:
+The worker can inspect the request lifecycle and test output without loading those details into the main session.
+
+Inputs:
+- src/profile/store.ts
+- src/profile/api.ts
+- tests/profile/store.test.ts
+
+Scope:
+- May edit the three files above.
+- May inspect directly imported helpers if necessary.
+
+Suggested steps:
+1. Reproduce or identify the stale-response path.
+2. Make the smallest safe fix.
+3. Add or adjust the focused regression test.
+4. Run the targeted tests.
+5. Self-review the diff once.
+
+Constraints:
+- Do not change the public profile API.
+- Do not add dependencies.
+- Do not refactor unrelated state code.
+
+Done when:
+- Older requests cannot overwrite newer profile state.
+- Existing profile tests still pass.
+
+Validation:
+- npm test -- tests/profile/store.test.ts
+
+Return only:
+- status
+- changed files
+- 2–5 bullet summary
+- validation result
+- important caveat / decision needed, if any
+```
+
+The point is not to make packets huge. The point is to remove ambiguity **before** handing the task to a cheaper worker.
+
+## ↩ Compact handoff
+
+Workers should not return their whole thought process, raw logs, or every file they opened.
+
+Preferred handoff:
+
+```text
+STATUS: success
+
+CHANGED:
+- src/profile/store.ts
+- tests/profile/store.test.ts
+
+RESULT:
+- stale requests can no longer replace newer profile state
+- regression coverage added for out-of-order responses
+
+VALIDATION:
+- PASS — npm test -- tests/profile/store.test.ts
+
+CAVEAT:
+- none
+```
+
+The main agent can open a diff or targeted artifact only when integration actually requires it.
+
+## ⇄ Worker lifecycle
 
 ```mermaid
 flowchart TD
-    A[Requested] --> B[Scoped]
-    B --> C{Route}
-    C -->|Small / tightly coupled| D[Assigned to SOL]
-    C -->|Bounded implementation| E[Assigned to LUNA]
-    C -->|Independent review| F[Assigned to TERRA]
-    D --> G[Executing]
-    E --> G
-    F --> G
-    G --> H[Reported]
-    H --> I[Validated by SOL]
-    I --> J[Completed]
-    I --> K[Needs input]
-    K --> B
+    A[Main identifies bounded heavy work] --> B[Create worker packet]
+    B --> C[LUNA inspects only required context]
+    C --> D[Execute]
+    D --> E[Test / verify]
+    E --> F[Self-review once]
+    F --> G{Meaningful issue?}
+    G -- Yes --> H[Targeted fix]
+    H --> I[Verify]
+    G -- No --> J[Compact handoff]
+    I --> J
+    J --> K[Main integrates]
 ```
 
-### The short version
+A separate reviewer worker is **not** the default. The worker that implements a bounded task should test and self-review it first.
 
-1. **SOL selects context:** Start with `.agentmaxxing/state.md`; load the active
-   task and architectural decisions only when needed.
-2. **Classify the work:** Make scope, acceptance criteria, file ownership, and
-   approval boundaries explicit.
-3. **Choose the route:** Keep small work with SOL; send bounded implementation
-   to LUNA and independent challenges to TERRA.
-4. **Compress the handoff:** The specialist reports changes, outcomes, test
-   evidence, and remaining work.
-5. **SOL validates:** Treat the report as an index; inspect the actual files and
-   rerun critical checks.
-6. **Persist changed truth only:** Update durable context after validation.
+Use another worker for review only when independent evaluation has real value: security-sensitive changes, consequential architecture, suspicious failures, or explicit user request.
 
-## ▣ Small, durable context
+## ⫶ Multiple workers without context explosion
+
+Parallel workers are useful only when their work is genuinely separable.
+
+### Good
 
 ```text
-.agentmaxxing/
-├── state.md              # Where are we now?
-├── decisions.md          # What durable decisions have we made?
-└── tasks/
-    └── current.md        # The single active integration task
+Worker A → inspect failing auth tests
+Worker B → migrate unrelated settings UI
+Worker C → research an external API compatibility question
 ```
 
-This directory is not a conversation archive. **SOL is the sole logical writer**;
-specialists may only propose context updates in their reports. Raw reasoning
-traces, full transcripts, and routine progress notes do not enter durable
-context.
-
-## ✉ What does a task handoff look like?
-
-### 1. SOL → specialist: task envelope
-
-```markdown
-Role: LUNA
-Goal: Reject expired refresh tokens before rotation.
-Scope:
-- src/auth/token.ts
-- tests/auth/token.test.ts
-Requirements:
-- Cover valid and expired token scenarios.
-Constraints:
-- Preserve the public API and session storage behavior.
-Acceptance:
-- Targeted tests pass.
-- Existing auth tests remain green.
-```
-
-### 2. Specialist → SOL: compressed result report
-
-```markdown
-Changed:
-- src/auth/token.ts
-- tests/auth/token.test.ts
-
-Fixed:
-- Expired refresh tokens are rejected before rotation.
-
-Tests:
-- PASS — npm test -- tests/auth/token.test.ts
-
-Remaining:
-- None
-
-Decision needed:
-- None
-```
-
-A task is ready to assign only when **Role**, **Goal**, **Scope**,
-**Requirements**, **Constraints**, and **Acceptance** are known. This prevents
-the specialist from rediscovering the entire repository.
-
-## ⌁ Core invariants
-
-| Principle | Practical consequence |
-| --- | --- |
-| **SOL remains accountable** | Delegation never transfers final ownership |
-| **Context is selected** | Agents receive only sufficient files and constraints |
-| **Scopes do not overlap** | Concurrent work has explicit file ownership |
-| **Claims are verifiable** | A `PASS` report includes an exact command or check |
-| **Roles are model-independent** | Responsibility contracts survive model changes |
-| **Permissions do not expand** | A specialist never receives broader authority than SOL or the user |
-
-## 🚀 Getting started
-
-The reference implementation in this repository is the repo-scoped
-[`$agentmaxxing` skill](.agents/skills/agentmaxxing/SKILL.md).
-
-### Install as a personal skill
-
-Use Codex's built-in installer so AgentMaxxing is available in every repository:
+### Bad
 
 ```text
-$skill-installer install the agentmaxxing skill from https://github.com/HakanBabus/AgentMaxxing/tree/main/.agents/skills/agentmaxxing
+Worker A → inspect auth system
+Worker B → inspect auth system again
+Worker C → review Worker A before Worker A even validates its own work
 ```
 
-Start a new Codex turn after installation. If the skill still does not appear,
-restart Codex and invoke it explicitly with `$agentmaxxing`.
+Rules:
 
-For repo-only use, keep or copy the skill folder at
-`.agents/skills/agentmaxxing/` and launch Codex from that repository or one of
-its subdirectories.
+- Do not assign overlapping write ownership at the same time.
+- Do not duplicate repository exploration without a reason.
+- Prefer sequential handoff when task B depends on task A.
+- Reuse an existing worker when continuing the exact same bounded task and the environment supports it.
+- Start a fresh worker for a new independent task so old context does not grow forever.
 
-### Run it
+## 🧱 Context firewall
 
-Invoke it from Codex with a concrete repository task:
+Think of AgentMaxxing as a context firewall:
 
 ```text
-$agentmaxxing implement the bounded task in .agentmaxxing/tasks/current.md
+heavy source / logs / tests / research
+                │
+                ▼
+          isolated LUNA
+                │
+        compact verified result
+                │
+                ▼
+             MAIN
 ```
 
-AgentMaxxing uses **explicit invocation only**. Codex will not select the skill
-automatically for ordinary repository tasks; start the request with
-`$agentmaxxing` or select the skill explicitly when you want the workflow.
+Main context should normally contain:
 
-The skill:
+- the user's goal
+- high-level project constraints
+- the current plan
+- task ownership
+- compact worker results
+- relevant diffs or artifacts needed for integration
 
-- Loads project state selectively.
-- Decides whether delegation adds enough value.
-- Gives specialists small, measurable task envelopes.
-- Validates handoffs against acceptance criteria.
-- Lets SOL alone update durable context.
-- Safely initializes and validates the three persistent context files.
+It should normally avoid:
 
-The workflow remains a standalone skill; plugin packaging is intentionally out
-of scope.
+- full worker transcripts
+- raw test floods
+- giant log files
+- entire repository dumps
+- repeated copies of the same source files
+- unrelated investigation trails
 
-## ◫ Documentation map
+## 🚀 Installation
 
-| Document | Covers |
-| --- | --- |
-| [Architecture](docs/architecture.md) | Boundaries, components, invariants, and failure modes |
-| [Task protocol](docs/task-protocol.md) | Task envelopes, result reports, and lifecycle contracts |
-| [Agent workflow](docs/workflow.md) | Routing, execution, validation, and measurement |
-| [Repo skill](.agents/skills/agentmaxxing/SKILL.md) | Operational instructions used by Codex |
-| [Contributing](CONTRIBUTING.md) | Development and contribution workflow |
-| [Security](SECURITY.md) | Private security reporting process |
-
-## 🗺 Roadmap
+The repo-scoped skill lives at:
 
 ```text
-Phase 1  Foundation       ████████████████████  Complete
-Phase 2  Core system      ░░░░░░░░░░░░░░░░░░░░  Planned
-Phase 3  Routing          ░░░░░░░░░░░░░░░░░░░░  Planned
-Phase 4  Optimization     ░░░░░░░░░░░░░░░░░░░░  Planned
+.agents/skills/agentmaxxing/
 ```
 
-- **Phase 1 — Foundation:** Repository structure, documentation, context
-  templates, workflow contracts, and the v0.1 Codex skill. **Complete.**
-- **Phase 2 — Core system:** Task manager, state manager, context loader, and
-  machine-readable agent messages.
-- **Phase 3 — Routing:** Evidence-based SOL/LUNA/TERRA selection and delegation
-  rules.
-- **Phase 4 — Optimization:** Token budgets, context compression, and routing
-  evaluation.
+Install it with the Codex skill installer when supported, or copy the skill directory into a repository's `.agents/skills/` folder.
 
-Each phase is acceptance-driven. A new phase starts only after the previous
-phase’s contracts have been exercised on representative tasks.
+Invoke explicitly:
 
-## 🤝 Contributing and boundaries
+```text
+$agentmaxxing <your repository task>
+```
 
-Phase 1 focuses on the protocol and its invariants. Before proposing an
-automation layer, open a discussion explaining which manual failure it removes
-and how it preserves the minimal-context design.
+AgentMaxxing intentionally uses explicit invocation so ordinary small tasks do not spawn workers or change workflow unexpectedly.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow, the
-[Code of Conduct](CODE_OF_CONDUCT.md) for community rules, and
-[SECURITY.md](SECURITY.md) for security reports.
+## 📁 Repository
+
+```text
+AgentMaxxing/
+├── .agents/
+│   └── skills/
+│       └── agentmaxxing/
+│           ├── SKILL.md
+│           ├── agents/
+│           │   └── openai.yaml
+│           └── references/
+│               ├── routing.md
+│               └── worker-packet.md
+├── docs/
+│   └── ARCHITECTURE.md
+├── AGENTS.md
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+└── README_TR.md
+```
+
+No runtime. No daemon. No database. No token accounting service. No persistent task registry.
+
+The product is the orchestration behavior.
+
+## 🖼 VisionOffload
+
+Visual offloading is intentionally **not included in this revision**.
+
+VisionOffload will be developed separately first, then its visual-context isolation rules can be integrated into AgentMaxxing without changing the core worker model.
+
+## Roadmap
+
+- [x] Context-first redesign
+- [x] LUNA-only worker model
+- [x] Explicit worker packet contract
+- [x] Dynamic worker count based on task independence
+- [x] Compact handoffs and worker self-review
+- [ ] VisionOffload integration
+- [ ] Real-world usage tuning
 
 ## License
 
-Licensed under the [Apache License 2.0](LICENSE).
+Apache License 2.0.
 
-AgentMaxxing is an independent open-source project and is not affiliated with
-or endorsed by OpenAI.
+AgentMaxxing is an independent open-source project and is not affiliated with or endorsed by OpenAI.

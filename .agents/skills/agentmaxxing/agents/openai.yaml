@@ -1,8 +1,8 @@
 interface:
   display_name: "AgentMaxxing"
-  short_description: "Orchestrate coding work with minimal context"
-  default_prompt: "Use $agentmaxxing to coordinate this repository task with minimal context and selective specialist delegation."
-  brand_color: "#F59E0B"
+  short_description: "Keep main context lean with scoped LUNA workers"
+  default_prompt: "Use $agentmaxxing to keep the main context small and delegate only well-scoped heavy work to LUNA workers."
+  brand_color: "#7C3AED"
 
 policy:
   allow_implicit_invocation: false

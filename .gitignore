@@ -1,21 +1,5 @@
-# Local environment and editor files
 .DS_Store
 Thumbs.db
-.idea/
-.vscode/
-
-# Logs and temporary files
 *.log
-tmp/
-
-# Python helper caches
-__pycache__/
-*.py[cod]
-
-# Future JavaScript/TypeScript tooling
-node_modules/
-dist/
-coverage/
 .env
 .env.*
-!.env.example

@@ -1,114 +1,142 @@
 ---
 name: agentmaxxing
-description: "Orchestrate substantial Codex repository work with minimal persistent context, selective SOL/LUNA/TERRA delegation, compressed handoffs, and final validation. Use only when the user explicitly invokes $agentmaxxing or explicitly asks to use the AgentMaxxing skill. Do not activate implicitly for ordinary repository tasks."
+description: Keep the main coding agent context small by selectively delegating heavy, bounded, or independent repository work to well-scoped LUNA workers. Use when the user explicitly invokes $agentmaxxing or explicitly asks to use AgentMaxxing. Prefer direct work for small tasks; use multiple workers only when their scopes are genuinely independent and context duplication is lower than the delegation benefit.
 ---
 
 # AgentMaxxing
 
-Act as **SOL**, the user-facing orchestrator and final owner. Preserve the user's
-goal, authorization boundary, and high-level project context. Delegation
-transfers bounded work, never accountability.
+Operate as the main orchestrator. Preserve the user's actual goal, key project constraints, and final integration responsibility while keeping heavy intermediate context out of the main session when practical.
 
-## Start with minimal context
+AgentMaxxing is context-first, not agent-count-first.
 
-1. Locate the repository root and inspect the working-tree status.
-2. If `.agentmaxxing/state.md` exists, read it.
-3. Read `.agentmaxxing/tasks/current.md` only when the request continues or
-   replaces active work.
-4. Read `.agentmaxxing/decisions.md` only when durable constraints may affect the
-   solution.
-5. Inspect the smallest relevant code surface. Broaden only when evidence shows
-   the task crosses that boundary.
+## Core rules
 
-If the context directory is missing, read
-[references/context-system.md](references/context-system.md). Create it only
-when the user asks to initialize AgentMaxxing or authorizes repository changes
-through a build, change, or fix request. For read-only requests, operate without
-creating files and mention that persistence was not initialized.
+1. **Do small work directly.** Delegation has overhead.
+2. **Delegate heavy bounded context.** Logs, broad exploration, focused implementation, tests, research, and other isolated work can stay inside workers.
+3. **Use LUNA workers.** Prefer `gpt-5.6-luna` with `xhigh` reasoning when available.
+4. **No arbitrary worker cap.** Use as many workers as the task genuinely benefits from, but avoid duplicate context and overlapping ownership.
+5. **Resolve ambiguity before delegation.** LUNA should receive a precise task packet, not a vague goal.
+6. **Worker self-check first.** The worker that performs a bounded task should test and review its own result before another reviewer is considered.
+7. **Return compact handoffs.** Do not bring raw logs, full transcripts, giant analyses, or unrelated exploration back into main context.
+8. **Main owns integration.** Delegation transfers bounded execution, not accountability.
 
-For authorized initialization, prefer the bundled deterministic helper instead
-of recreating templates manually:
+## Decide whether to delegate
+
+Work directly when the task is small, tightly coupled to context already loaded by the main agent, or cheaper to finish than to explain to a worker.
+
+Delegate when one or more of these are true:
+
+- the task requires reading or searching a large amount of material;
+- raw logs, test output, or build output would pollute main context;
+- implementation is bounded and acceptance criteria can be stated clearly;
+- several independent workstreams can progress without sharing write ownership;
+- research or repository exploration can be summarized into a compact result;
+- the main agent needs isolation more than it needs every intermediate detail.
+
+Do not delegate merely because a worker exists.
+
+## Multiple workers
+
+There is no fixed worker limit.
+
+Before spawning more than one worker, verify that the tasks are meaningfully independent. Prefer parallel workers when they can operate with different inputs or non-overlapping write scopes.
+
+Avoid:
+
+- assigning the same file to multiple active writers;
+- asking several workers to rediscover the same architecture;
+- opening a reviewer before the implementing worker has tested and self-reviewed;
+- splitting one tightly coupled change into artificial fragments;
+- spawning workers whose combined task packets duplicate more context than they isolate.
+
+If task B depends on task A, keep them sequential or resume the appropriate worker when supported.
+
+A new independent task should normally receive a fresh worker so old worker context does not become a second giant session.
+
+## Build a strong LUNA packet
+
+Before delegating, read [references/worker-packet.md](references/worker-packet.md).
+
+Every non-trivial packet should make these explicit:
+
+- **Goal** — one concrete outcome.
+- **Why delegated** — what context or workload should remain isolated.
+- **Inputs** — exact files, directories, logs, commands, URLs, or artifacts that matter.
+- **Scope** — what the worker may inspect or change.
+- **Suggested steps** — a short execution path when useful.
+- **Constraints** — behavior, APIs, dependencies, styles, or files that must remain unchanged.
+- **Done when** — measurable acceptance criteria.
+- **Validation** — exact checks or tests when known.
+- **Return only** — the compact handoff format.
+
+Do not send the full conversation, full repository dumps, unrelated files, or broad historical context unless the worker cannot complete the task without them.
+
+When LUNA struggles, first improve the packet: narrow the goal, add the missing local fact, give a concrete validation command, or split a genuinely overloaded task. Do not automatically flood it with more context.
+
+## Worker execution contract
+
+Ask the worker to:
+
+1. inspect the bounded inputs;
+2. perform the task;
+3. run the relevant validation;
+4. self-review its own diff/result once;
+5. make one targeted correction if a meaningful issue remains;
+6. verify again when needed;
+7. return only the compact handoff.
+
+Additional correction passes are allowed when necessary, but do not create uncontrolled loops.
+
+A separate reviewer worker is optional, not default. Use one only when independent evaluation has clear value, such as security-sensitive work, consequential architecture, suspicious validation, or explicit user request.
+
+## Compact handoff
+
+Workers should return only information the main agent needs to integrate:
 
 ```text
-python <skill-directory>/scripts/context.py init --root <repo-root> --project <project-name> --goal "<current goal>"
+STATUS: success | needs-input | failed
+
+CHANGED:
+- <paths or none>
+
+RESULT:
+- <2-5 concise bullets>
+
+VALIDATION:
+- PASS/FAIL/SKIPPED — <exact command or check>
+
+CAVEAT / DECISION NEEDED:
+- <only if material>
 ```
 
-The helper creates missing files but never overwrites existing context. Inspect
-its output before continuing.
+Do not request chain-of-thought, full work logs, raw test floods, or verbose narration.
 
-## Scope the outcome
+Treat the handoff as a navigation index. Open a targeted diff, file, or artifact only when integration, risk, or uncertainty requires it. Do not automatically reread everything the worker already processed.
 
-Determine the requested result, affected boundary, observable acceptance
-criteria, validation commands, approval limits, and material unknowns.
+## Main-agent integration
 
-Work directly when the task is small, tightly coupled to SOL's current context,
-or cheaper to complete than to hand off. Do not delegate merely because a
-specialist is available.
+The main agent should maintain:
 
-## Route specialist work selectively
+- the user's goal;
+- high-level constraints and architecture relevant to the task;
+- task decomposition and worker ownership;
+- compact worker results;
+- only the diffs or artifacts required for final integration.
 
-Use **LUNA** for narrow implementation, refactoring, repetitive edits, and tests
-when interfaces and acceptance criteria are stable.
+The main agent is responsible for detecting conflicts between handoffs and deciding whether additional validation is necessary.
 
-Use **TERRA** for independent architecture challenge, uncertain root-cause
-analysis, security thinking, failure-mode review, or consequential alternatives.
-TERRA is advisory unless a separate task explicitly authorizes changes.
+Do not maintain a persistent task database, transcript archive, or context registry merely for AgentMaxxing. Prefer the repository's existing project documentation and source of truth. Add persistent orchestration files only when the user explicitly wants them or the project has a concrete need.
 
-When these execution profiles are available, prefer:
+## Routing reference
 
-- **LUNA:** `gpt-5.6-luna` with `xhigh` reasoning effort.
-- **TERRA:** `gpt-5.6-terra` with `medium` reasoning effort.
+For edge cases around direct work, single-worker delegation, parallel delegation, sequential dependencies, and reviewer use, read [references/routing.md](references/routing.md).
 
-If a profile is unavailable, preserve the role contract with an available model
-and report the fallback. Do not claim that a requested specialist ran when no
-delegation capability was available.
+## Visual work
 
-Delegate only tasks that have one measurable goal, non-overlapping ownership,
-stable constraints, and verifiable completion. Keep tightly dependent work
-sequential. Do not assign the same file to multiple active agents. Specialists
-must not spawn further agents unless the task envelope explicitly permits it.
+VisionOffload is intentionally outside this revision. Do not invent a visual worker protocol here. When VisionOffload is later integrated, it should reuse the same principles: minimum task context, isolated heavy payload, worker self-review, and compact handoff.
 
-Before delegating, read
-[references/task-contract.md](references/task-contract.md) and send the smallest
-sufficient task envelope. Do not send full conversations, repository dumps, or
-unrelated persistent context.
+## Permissions
 
-## Integrate, validate, and persist
+Delegation never expands the user's authorization. Workers inherit the same constraints as the main agent and must stop at destructive, external, costly, or scope-expanding boundaries that were not authorized.
 
-Treat a specialist report as an index, not proof. Review the affected artifacts,
-check scope, and run proportionate validation against every acceptance
-criterion. Expose failed or skipped checks; never convert them into `PASS`.
-
-SOL alone writes `.agentmaxxing/`. After validation:
-
-- replace stale facts in `state.md` when current project truth changed;
-- record only durable architectural decisions in `decisions.md`;
-- complete, clear, or replace `tasks/current.md`;
-- omit transcripts, raw reasoning, routine progress, secrets, and user data.
-
-For exact update rules, read
-[references/context-system.md](references/context-system.md).
-
-Before reporting completion, validate the persistent structure when it exists:
-
-```text
-python <skill-directory>/scripts/context.py check --root <repo-root>
-```
-
-Treat a nonzero result as incomplete validation; repair only issues within the
-authorized scope.
-
-Return the integrated outcome to the user with changed artifacts, validation
-evidence, material caveats, and remaining work. Keep orchestration mechanics
-brief unless the user asks for them.
-
-## Permission and stopping rules
-
-Delegation never expands authorization. Require user direction before external,
-destructive, costly, or materially scope-expanding actions unless already
-authorized. A specialist encountering such a boundary reports `Decision needed`
-to SOL instead of proceeding.
-
-Stop delegating when coordination overhead exceeds likely benefit, acceptance
-criteria are satisfied, or progress requires a user decision. Do not create
-agents to repeat completed analysis.
+Keep orchestration mechanics brief in the user-facing response unless the user asks for details.
