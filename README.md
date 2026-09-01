@@ -9,7 +9,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![Workers](https://img.shields.io/badge/workers-LUNA-7c3aed)
-![Design](https://img.shields.io/badge/design-context--first-0ea5e9)
 
 [English](README.md) · [Türkçe](README_TR.md)
 
@@ -17,270 +16,141 @@
 
 ---
 
-AgentMaxxing is a lightweight orchestration skill built around one idea:
+AgentMaxxing is a lightweight orchestration skill built around one rule:
 
-> **The main agent should keep the goal, decisions, and integration context — not every log, file, exploration path, and intermediate detail.**
+> **The main agent keeps the goal, decisions, and integration context. Heavy bounded work goes to LUNA workers.**
 
-The main agent stays responsible for planning and final integration. Heavy or isolated work can be delegated to **LUNA workers** using small, explicit task packets. Workers return compact, verifiable handoffs instead of dumping their full context back into the main session.
+Workers receive small, explicit task packets and return compact, verifiable results. AgentMaxxing does not maximize agent count; it minimizes duplicated context.
 
-AgentMaxxing does **not** try to maximize the number of agents. It tries to minimize duplicated context.
-
-## ✦ The core model
+## Core model
 
 ```mermaid
 flowchart LR
-    U([User]) --> M["MAIN AGENT<br/>goal · plan · integration"]
-    M --> R{"Delegation useful?"}
-    R -- No --> D["Work directly"]
-    R -- Yes --> P["Build precise<br/>worker packet"]
-    P --> W1["LUNA worker"]
-    P --> W2["LUNA worker"]
-    P --> WN["LUNA worker …"]
-    W1 --> H["Compact handoff"]
+    U([User]) --> M["MAIN<br/>goal · decisions · integration"]
+    M --> R{"Delegate?"}
+    R -- No --> D[Work directly]
+    R -- Yes --> P[Build bounded packet]
+    P --> W1[LUNA]
+    P --> W2[LUNA]
+    P --> WN["LUNA …"]
+    W1 --> H[Compact handoff]
     W2 --> H
     WN --> H
     H --> M
     D --> M
 ```
 
-There is **no arbitrary one-worker cap**. Open as many workers as the task genuinely benefits from — but only when their responsibilities are independent enough to avoid duplicated reading and conflicting edits.
+There is no fixed worker limit. Use another worker only when its work is genuinely independent and the context saved is worth the coordination cost.
 
-The default bias is still conservative:
+## Routing
 
-- tiny task → main handles it
-- one heavy bounded task → one worker
-- several independent heavy tasks → several workers
-- tightly coupled tasks → keep sequential
-- same files / same investigation duplicated across workers → avoid
-
-## ◈ Why this exists
-
-Long coding sessions often become expensive and fragile for a simple reason: too much material accumulates in the primary session.
-
-Examples:
-
-- giant logs
-- broad repository exploration
-- repeated test output
-- large source files
-- research dumps
-- build failures
-- several implementation branches
-- verbose agent reports
-
-AgentMaxxing treats the main context as a scarce resource.
-
-| Without context discipline | With AgentMaxxing |
+| Work | Default route |
 | --- | --- |
-| Main reads everything | Main reads the minimum needed to route and integrate |
-| Workers rediscover the project | Workers receive a scoped packet |
-| Same task gets analyzed repeatedly | Ownership is explicit |
-| Worker sends a long transcript back | Worker sends a compact result |
-| Reviewer agent is opened by default | Worker self-checks first |
-| Parallelism is used because it exists | Parallelism is used only when work is independent |
+| Tiny or tightly coupled task | Main handles it directly |
+| One heavy, bounded task | One LUNA worker |
+| Independent heavy workstreams | Multiple LUNA workers |
+| Sequential dependencies | Finish and condense the first result before starting the next |
+| Security-sensitive or high-risk review | Add an independent reviewer only when justified |
 
-## 🧠 Roles
+Avoid overlapping write ownership, repeated repository discovery, and workers that receive the full conversation without a concrete need.
 
-### MAIN — orchestrator
+## Responsibilities
+
+### Main agent
 
 The main agent owns:
 
-- user intent
-- architecture-level decisions
-- task decomposition
-- worker selection
-- conflict avoidance
-- final integration
-- final answer
+- user intent and constraints;
+- architectural decisions;
+- task decomposition and worker ownership;
+- conflict detection;
+- final integration and validation;
+- the final answer.
 
-The main agent should avoid loading heavy material that a worker can inspect independently.
+### LUNA worker
 
-### LUNA — isolated worker
+A LUNA worker owns one bounded outcome. It should:
 
-LUNA is intentionally treated as an **execution worker, not a vague autonomous teammate**.
+1. inspect only the required inputs;
+2. complete the task within its scope;
+3. run relevant validation;
+4. self-review once and make a targeted correction if needed;
+5. return a compact handoff.
 
-LUNA works best when the main agent gives it a precise packet containing:
-
-1. **Goal** — one concrete outcome.
-2. **Why this is delegated** — what heavy context should remain isolated.
-3. **Inputs** — exact files, commands, logs, URLs, or directories that matter.
-4. **Scope** — what it may change or inspect.
-5. **Steps** — a short suggested path when the task is non-trivial.
-6. **Constraints** — APIs, dependencies, behavior, style, or files that must remain untouched.
-7. **Done when** — measurable acceptance criteria.
-8. **Validation** — exact tests/checks when known.
-9. **Return format** — compact handoff only.
-
-Recommended worker profile when available:
+Recommended profile when available:
 
 ```text
 model: gpt-5.6-luna
 reasoning: xhigh
 ```
 
-The higher reasoning level compensates for the worker receiving less broad context. The main agent should improve the packet before adding more context.
+## Worker packet
 
-## ✉ Worker packet
-
-A good packet is intentionally boring and explicit:
+Before delegating, remove ambiguity. A useful packet looks like this:
 
 ```markdown
 Role: LUNA worker
 
 Goal:
-Fix the stale profile request race condition.
+<one concrete outcome>
 
 Why delegated:
-The worker can inspect the request lifecycle and test output without loading those details into the main session.
+<heavy context or workload that should stay isolated>
 
 Inputs:
-- src/profile/store.ts
-- src/profile/api.ts
-- tests/profile/store.test.ts
+- <exact files, directories, logs, commands, URLs, or artifacts>
 
 Scope:
-- May edit the three files above.
-- May inspect directly imported helpers if necessary.
+- May inspect: <...>
+- May edit: <...>
+- Must not edit: <...>
 
 Suggested steps:
-1. Reproduce or identify the stale-response path.
-2. Make the smallest safe fix.
-3. Add or adjust the focused regression test.
-4. Run the targeted tests.
-5. Self-review the diff once.
+1. <first useful step>
+2. <validation and self-review>
 
 Constraints:
-- Do not change the public profile API.
-- Do not add dependencies.
-- Do not refactor unrelated state code.
+- <behavior, API, dependency, style, or permission boundary>
 
 Done when:
-- Older requests cannot overwrite newer profile state.
-- Existing profile tests still pass.
+- <measurable acceptance criterion>
 
 Validation:
-- npm test -- tests/profile/store.test.ts
+- <exact command or check>
 
 Return only:
 - status
 - changed files
-- 2–5 bullet summary
+- 2–5 result bullets
 - validation result
-- important caveat / decision needed, if any
+- material caveat or decision needed
 ```
 
-The point is not to make packets huge. The point is to remove ambiguity **before** handing the task to a cheaper worker.
+See [worker packet guidance](.agents/skills/agentmaxxing/references/worker-packet.md) and [routing guidance](.agents/skills/agentmaxxing/references/routing.md) for edge cases.
 
-## ↩ Compact handoff
+## Compact handoff
 
-Workers should not return their whole thought process, raw logs, or every file they opened.
-
-Preferred handoff:
+Workers should return an integration index, not a transcript:
 
 ```text
-STATUS: success
+STATUS: success | needs-input | failed
 
 CHANGED:
-- src/profile/store.ts
-- tests/profile/store.test.ts
+- <paths or none>
 
 RESULT:
-- stale requests can no longer replace newer profile state
-- regression coverage added for out-of-order responses
+- <2–5 concise bullets>
 
 VALIDATION:
-- PASS — npm test -- tests/profile/store.test.ts
+- PASS/FAIL/SKIPPED — <exact command or check>
 
-CAVEAT:
-- none
+CAVEAT / DECISION NEEDED:
+- <only if material>
 ```
 
-The main agent can open a diff or targeted artifact only when integration actually requires it.
+The main agent opens only the diffs or artifacts needed for integration.
 
-## ⇄ Worker lifecycle
-
-```mermaid
-flowchart TD
-    A[Main identifies bounded heavy work] --> B[Create worker packet]
-    B --> C[LUNA inspects only required context]
-    C --> D[Execute]
-    D --> E[Test / verify]
-    E --> F[Self-review once]
-    F --> G{Meaningful issue?}
-    G -- Yes --> H[Targeted fix]
-    H --> I[Verify]
-    G -- No --> J[Compact handoff]
-    I --> J
-    J --> K[Main integrates]
-```
-
-A separate reviewer worker is **not** the default. The worker that implements a bounded task should test and self-review it first.
-
-Use another worker for review only when independent evaluation has real value: security-sensitive changes, consequential architecture, suspicious failures, or explicit user request.
-
-## ⫶ Multiple workers without context explosion
-
-Parallel workers are useful only when their work is genuinely separable.
-
-### Good
-
-```text
-Worker A → inspect failing auth tests
-Worker B → migrate unrelated settings UI
-Worker C → research an external API compatibility question
-```
-
-### Bad
-
-```text
-Worker A → inspect auth system
-Worker B → inspect auth system again
-Worker C → review Worker A before Worker A even validates its own work
-```
-
-Rules:
-
-- Do not assign overlapping write ownership at the same time.
-- Do not duplicate repository exploration without a reason.
-- Prefer sequential handoff when task B depends on task A.
-- Reuse an existing worker when continuing the exact same bounded task and the environment supports it.
-- Start a fresh worker for a new independent task so old context does not grow forever.
-
-## 🧱 Context firewall
-
-Think of AgentMaxxing as a context firewall:
-
-```text
-heavy source / logs / tests / research
-                │
-                ▼
-          isolated LUNA
-                │
-        compact verified result
-                │
-                ▼
-             MAIN
-```
-
-Main context should normally contain:
-
-- the user's goal
-- high-level project constraints
-- the current plan
-- task ownership
-- compact worker results
-- relevant diffs or artifacts needed for integration
-
-It should normally avoid:
-
-- full worker transcripts
-- raw test floods
-- giant log files
-- entire repository dumps
-- repeated copies of the same source files
-- unrelated investigation trails
-
-## 🚀 Installation
+## Installation
 
 The repo-scoped skill lives at:
 
@@ -288,61 +158,37 @@ The repo-scoped skill lives at:
 .agents/skills/agentmaxxing/
 ```
 
-Install it with the Codex skill installer when supported, or copy the skill directory into a repository's `.agents/skills/` folder.
-
-Invoke explicitly:
+Install it with the Codex skill installer or copy that directory into a supported skills location. Invoke it explicitly:
 
 ```text
 $agentmaxxing <your repository task>
 ```
 
-AgentMaxxing intentionally uses explicit invocation so ordinary small tasks do not spawn workers or change workflow unexpectedly.
+Implicit invocation is disabled so ordinary small tasks do not change workflow unexpectedly.
 
-## 📁 Repository
+## Repository
 
 ```text
 AgentMaxxing/
-├── .agents/
-│   └── skills/
-│       └── agentmaxxing/
-│           ├── SKILL.md
-│           ├── agents/
-│           │   └── openai.yaml
-│           └── references/
-│               ├── routing.md
-│               └── worker-packet.md
-├── docs/
-│   └── ARCHITECTURE.md
+├── .agents/skills/agentmaxxing/
+│   ├── SKILL.md
+│   ├── agents/openai.yaml
+│   └── references/
+│       ├── routing.md
+│       └── worker-packet.md
+├── docs/ARCHITECTURE.md
 ├── AGENTS.md
 ├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── LICENSE
 ├── README.md
 └── README_TR.md
 ```
 
-No runtime. No daemon. No database. No token accounting service. No persistent task registry.
+AgentMaxxing is an instruction layer, not a runtime. It has no daemon, database, telemetry service, token ledger, or persistent task registry.
 
-The product is the orchestration behavior.
+## VisionOffload
 
-## 🖼 VisionOffload
-
-Visual offloading is intentionally **not included in this revision**.
-
-VisionOffload will be developed separately first, then its visual-context isolation rules can be integrated into AgentMaxxing without changing the core worker model.
-
-## Roadmap
-
-- [x] Context-first redesign
-- [x] LUNA-only worker model
-- [x] Explicit worker packet contract
-- [x] Dynamic worker count based on task independence
-- [x] Compact handoffs and worker self-review
-- [ ] VisionOffload integration
-- [ ] Real-world usage tuning
+VisionOffload is intentionally not included yet. It will be developed separately and can later reuse the same context-isolation principles.
 
 ## License
 
-Apache License 2.0.
-
-AgentMaxxing is an independent open-source project and is not affiliated with or endorsed by OpenAI.
+Apache License 2.0. AgentMaxxing is an independent open-source project and is not affiliated with or endorsed by OpenAI.
