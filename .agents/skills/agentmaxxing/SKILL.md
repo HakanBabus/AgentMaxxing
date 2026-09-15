@@ -13,12 +13,14 @@ AgentMaxxing is context-first, not agent-count-first.
 
 1. **Do small work directly.** Delegation has overhead.
 2. **Delegate heavy bounded context.** Logs, broad exploration, focused implementation, tests, research, and other isolated work can stay inside workers.
-3. **Use LUNA workers.** Prefer `gpt-5.6-luna` with `xhigh` reasoning when available.
+3. **Use LUNA workers.** Use `gpt-5.6-luna` with either `xhigh` or `max` reasoning according to task complexity.
 4. **No arbitrary worker cap.** Use as many workers as the task genuinely benefits from, but avoid duplicate context and overlapping ownership.
 5. **Resolve ambiguity before delegation.** LUNA should receive a precise task packet, not a vague goal.
-6. **Worker self-check first.** The worker that performs a bounded task should test and review its own result before another reviewer is considered.
-7. **Return compact handoffs.** Do not bring raw logs, full transcripts, giant analyses, or unrelated exploration back into main context.
-8. **Main owns integration.** Delegation transfers bounded execution, not accountability.
+6. **Worker self-check first.** The worker that performs a bounded task should test and review its own result before main review or another reviewer is considered.
+7. **Gate every delegated stage.** The main agent must explicitly accept a delegated result before integration or any dependent stage begins.
+8. **Reject back to LUNA.** When the main agent rejects a result, return a targeted correction packet to LUNA; do not silently skip the issue or take over the delegated implementation merely to avoid another worker pass.
+9. **Return compact handoffs.** Do not bring raw logs, full transcripts, giant analyses, or unrelated exploration back into main context.
+10. **Main owns integration.** Delegation transfers bounded execution, not accountability.
 
 ## Decide whether to delegate
 
@@ -51,6 +53,8 @@ Avoid:
 
 If task B depends on task A, keep them sequential or resume the appropriate worker when supported.
 
+Do not start task B until the main agent has explicitly accepted task A. A successful worker status is a review request, not automatic acceptance.
+
 A new independent task should normally receive a fresh worker so old worker context does not become a second giant session.
 
 ## Build a strong LUNA packet
@@ -73,6 +77,17 @@ Do not send the full conversation, full repository dumps, unrelated files, or br
 
 When LUNA struggles, first improve the packet: narrow the goal, add the missing local fact, give a concrete validation command, or split a genuinely overloaded task. Do not automatically flood it with more context.
 
+## Choose LUNA reasoning effort
+
+Use only `xhigh` or `max` for AgentMaxxing workers when both are available.
+
+- Choose `xhigh` for well-bounded work with stable interfaces, explicit acceptance criteria, and reliable validation.
+- Choose `max` for cross-system implementation, architecture-heavy work, UI/input/render interactions, nondeterministic failures, expensive regressions, or tasks whose quality cannot be captured by one automated test.
+- Prefer `max` at the start of an obviously difficult task instead of expecting an underpowered pass to fail.
+- If an `xhigh` worker repeatedly misses the same material requirement, reframe or split the task and send the smallest sufficient correction context to a fresh `max` LUNA worker.
+
+Read [references/routing.md](references/routing.md) for the detailed routing and escalation rules.
+
 ## Worker execution contract
 
 Ask the worker to:
@@ -81,11 +96,12 @@ Ask the worker to:
 2. perform the task;
 3. run the relevant validation;
 4. self-review its own diff/result once;
-5. make one targeted correction if a meaningful issue remains;
-6. verify again when needed;
-7. return only the compact handoff.
+5. correct every material issue it finds within the authorized scope;
+6. verify again after corrections;
+7. map evidence to each acceptance criterion;
+8. return only the compact handoff as `ready-for-review`.
 
-Additional correction passes are allowed when necessary, but do not create uncontrolled loops.
+The worker must not mark a stage ready while a required criterion is knowingly unmet. If completion requires user input, new authorization, unavailable external state, or a materially different scope, return `needs-input` with the exact blocker.
 
 A separate reviewer worker is optional, not default. Use one only when independent evaluation has clear value, such as security-sensitive work, consequential architecture, suspicious validation, or explicit user request.
 
@@ -94,7 +110,7 @@ A separate reviewer worker is optional, not default. Use one only when independe
 Workers should return only information the main agent needs to integrate:
 
 ```text
-STATUS: success | needs-input | failed
+STATUS: ready-for-review | needs-input | failed
 
 CHANGED:
 - <paths or none>
@@ -102,8 +118,15 @@ CHANGED:
 RESULT:
 - <2-5 concise bullets>
 
+ACCEPTANCE:
+- A1 PASS/FAIL — <concise evidence>
+- A2 PASS/FAIL — <concise evidence>
+
 VALIDATION:
 - PASS/FAIL/SKIPPED — <exact command or check>
+
+SELF-REVIEW:
+- <material issue corrected, or none>
 
 CAVEAT / DECISION NEEDED:
 - <only if material>
@@ -112,6 +135,25 @@ CAVEAT / DECISION NEEDED:
 Do not request chain-of-thought, full work logs, raw test floods, or verbose narration.
 
 Treat the handoff as a navigation index. Open a targeted diff, file, or artifact only when integration, risk, or uncertainty requires it. Do not automatically reread everything the worker already processed.
+
+## Main-agent acceptance gate
+
+For every delegated stage, the main agent must issue one of two decisions:
+
+- **ACCEPT** — every required acceptance criterion has credible evidence, validation is proportionate to risk, changes remain in scope, and no material issue is being ignored.
+- **REJECT** — at least one criterion lacks evidence, validation is insufficient, scope drift exists, or a material defect remains.
+
+Review economically. Check the changed-path list, criterion-to-evidence mapping, required validation, declared critical review surfaces, and only the integration-sensitive diff or artifacts needed to decide. Expand review when evidence is inconsistent, tests fail or are skipped, unexpected files changed, or risk is high. Do not reproduce the worker's entire investigation by default.
+
+On rejection:
+
+1. identify the failed acceptance IDs and concrete evidence;
+2. state what already-passing behavior must remain unchanged;
+3. give the exact correction scope and required recheck;
+4. return the correction to the same LUNA worker when the bounded task and context remain valid;
+5. require a delta handoff and decide again.
+
+Continue the correction cycle until the stage is accepted or a real authorization, user-decision, or external-state blocker is reached. Never lower acceptance criteria, call an unaccepted stage complete, or advance a dependent stage. If the same approach stalls, improve the packet, split the stage along a real boundary, or escalate from `xhigh` to a fresh `max` LUNA worker rather than repeating an unchanged instruction.
 
 ## Main-agent integration
 
@@ -124,6 +166,8 @@ The main agent should maintain:
 - only the diffs or artifacts required for final integration.
 
 The main agent is responsible for detecting conflicts between handoffs and deciding whether additional validation is necessary.
+
+Once implementation is delegated, the main agent keeps review and integration ownership while LUNA keeps implementation and correction ownership for that bounded stage. The main agent should not rewrite rejected worker code itself merely to save a delegation round.
 
 Do not maintain a persistent task database, transcript archive, or context registry merely for AgentMaxxing. Prefer the repository's existing project documentation and source of truth. Add persistent orchestration files only when the user explicitly wants them or the project has a concrete need.
 

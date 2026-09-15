@@ -18,7 +18,7 @@
 
 AgentMaxxing is a lightweight orchestration skill built around one rule:
 
-> **The main agent keeps the goal, decisions, and integration context. Heavy bounded work goes to LUNA workers.**
+> **The main agent keeps the goal, decisions, acceptance, and integration context. Heavy bounded work goes to LUNA workers.**
 
 Workers receive small, explicit task packets and return compact, verifiable results. AgentMaxxing does not maximize agent count; it minimizes duplicated context.
 
@@ -33,14 +33,20 @@ flowchart LR
     P --> W1[LUNA]
     P --> W2[LUNA]
     P --> WN["LUNA …"]
-    W1 --> H[Compact handoff]
+    W1 --> H[Evidence handoff]
     W2 --> H
     WN --> H
-    H --> M
+    H --> G{"ACCEPT?"}
+    G -- Yes --> M
+    G -- No --> C[Targeted correction packet]
+    C --> OW[Same owning LUNA]
+    OW --> H
     D --> M
 ```
 
 There is no fixed worker limit. Use another worker only when its work is genuinely independent and the context saved is worth the coordination cost.
+
+Worker completion is not automatic acceptance. A dependent stage stays locked until the main agent explicitly accepts its prerequisite.
 
 ## Routing
 
@@ -49,7 +55,7 @@ There is no fixed worker limit. Use another worker only when its work is genuine
 | Tiny or tightly coupled task | Main handles it directly |
 | One heavy, bounded task | One LUNA worker |
 | Independent heavy workstreams | Multiple LUNA workers |
-| Sequential dependencies | Finish and condense the first result before starting the next |
+| Sequential dependencies | Accept the prerequisite before starting the next stage |
 | Security-sensitive or high-risk review | Add an independent reviewer only when justified |
 
 Avoid overlapping write ownership, repeated repository discovery, and workers that receive the full conversation without a concrete need.
@@ -65,6 +71,7 @@ The main agent owns:
 - task decomposition and worker ownership;
 - conflict detection;
 - final integration and validation;
+- explicit `ACCEPT` or `REJECT` decisions for delegated stages;
 - the final answer.
 
 ### LUNA worker
@@ -74,15 +81,18 @@ A LUNA worker owns one bounded outcome. It should:
 1. inspect only the required inputs;
 2. complete the task within its scope;
 3. run relevant validation;
-4. self-review once and make a targeted correction if needed;
-5. return a compact handoff.
+4. self-review and correct every material issue it finds;
+5. map concise evidence to each acceptance criterion;
+6. return `ready-for-review` with a compact handoff.
 
-Recommended profile when available:
+Reasoning profile when available:
 
 ```text
 model: gpt-5.6-luna
-reasoning: xhigh
+reasoning: xhigh | max
 ```
+
+Use **xhigh** for bounded work with stable interfaces and direct validation. Use **max** for cross-system implementation, architecture-heavy work, UI/input/render interactions, nondeterministic failures, and expensive regressions. If xhigh repeatedly misses the same material requirement, reframe or split the task and send the smallest sufficient correction context to a fresh max worker.
 
 ## Worker packet
 
@@ -90,6 +100,9 @@ Before delegating, remove ambiguity. A useful packet looks like this:
 
 ```markdown
 Role: LUNA worker
+
+Reasoning:
+xhigh | max
 
 Goal:
 <one concrete outcome>
@@ -113,7 +126,11 @@ Constraints:
 - <behavior, API, dependency, style, or permission boundary>
 
 Done when:
-- <measurable acceptance criterion>
+- A1 — <measurable acceptance criterion>
+- A2 — <measurable acceptance criterion>
+
+Critical review surfaces:
+- <integration boundary, risky behavior, or artifact the main should inspect>
 
 Validation:
 - <exact command or check>
@@ -122,7 +139,9 @@ Return only:
 - status
 - changed files
 - 2–5 result bullets
+- acceptance evidence for every criterion
 - validation result
+- self-review result
 - material caveat or decision needed
 ```
 
@@ -133,7 +152,7 @@ See [worker packet guidance](.agents/skills/agentmaxxing/references/worker-packe
 Workers should return an integration index, not a transcript:
 
 ```text
-STATUS: success | needs-input | failed
+STATUS: ready-for-review | needs-input | failed
 
 CHANGED:
 - <paths or none>
@@ -141,14 +160,30 @@ CHANGED:
 RESULT:
 - <2–5 concise bullets>
 
+ACCEPTANCE:
+- A1 PASS/FAIL — <concise evidence>
+- A2 PASS/FAIL — <concise evidence>
+
 VALIDATION:
 - PASS/FAIL/SKIPPED — <exact command or check>
+
+SELF-REVIEW:
+- <material issue corrected, or none>
 
 CAVEAT / DECISION NEEDED:
 - <only if material>
 ```
 
 The main agent opens only the diffs or artifacts needed for integration.
+
+## Acceptance and correction
+
+The main agent checks changed paths, acceptance evidence, required validation, declared critical surfaces, and only the integration-sensitive diff or artifacts needed for a decision.
+
+- **ACCEPT** when every required criterion has credible evidence and no material issue is ignored.
+- **REJECT** when evidence is missing, validation is insufficient, scope drift exists, or a material defect remains.
+
+On rejection, the main agent sends the same LUNA worker the failed acceptance IDs, observed evidence, behavior to preserve, correction scope, and exact recheck. LUNA returns a delta handoff and the main agent decides again. The loop continues until acceptance or a real authorization, user-decision, or external-state blocker. The main agent does not waive the criterion, silently repair the rejected delegated implementation, or unlock a dependent stage.
 
 ## Installation
 

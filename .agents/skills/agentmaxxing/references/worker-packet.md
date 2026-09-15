@@ -9,6 +9,9 @@ Use the smallest packet that makes the task independently executable.
 ```markdown
 Role: LUNA worker
 
+Reasoning:
+xhigh | max
+
 Goal:
 <one concrete outcome>
 
@@ -32,17 +35,22 @@ Constraints:
 - <API / dependency / behavior / style constraint>
 
 Done when:
-- <measurable result>
-- <measurable result>
+- A1 — <measurable result>
+- A2 — <measurable result>
+
+Critical review surfaces:
+- <integration boundary, risky behavior, or artifact the main should inspect>
 
 Validation:
 - <exact command/check if known>
 
 Return only:
-- status
+- status: ready-for-review | needs-input | failed
 - changed files
 - 2–5 result bullets
+- acceptance result and concise evidence for every acceptance ID
 - validation result
+- self-review result
 - material caveat or decision needed
 ```
 
@@ -63,6 +71,37 @@ A packet is strong when the worker knows:
 - what it must preserve;
 - how to prove completion;
 - how little it should send back.
+
+Acceptance criteria must describe observable outcomes, not implementation activity. "Added a handler" is not sufficient; "losing and regaining window focus does not produce a camera jump" is.
+
+## Correction packet
+
+When the main agent rejects a result, keep the retry small and specific:
+
+```markdown
+Review result: REJECT
+
+Failed:
+- A2 — <concrete observed failure>
+
+Preserve:
+- <already-passing behavior>
+
+Correction scope:
+- <allowed files and behavior>
+
+Required recheck:
+- <exact command, interaction, or artifact>
+
+Return only:
+- changed paths in this correction
+- delta summary
+- updated acceptance evidence
+- validation result
+- material blocker, if any
+```
+
+Return the correction to the same worker while the bounded context remains useful. Do not mark the stage complete or begin a dependent stage until the main agent accepts it. If the correction requires new authorization, user input, unavailable external state, or a materially different scope, report `needs-input` rather than pretending the criterion passed.
 
 ## When the task is too large
 

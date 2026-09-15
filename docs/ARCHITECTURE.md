@@ -10,7 +10,7 @@ Reduce unnecessary growth of the main agent context while preserving one clear i
 
 ### Main agent
 
-Owns user intent, decomposition, architectural decisions, conflict detection, and final integration.
+Owns user intent, decomposition, architectural decisions, conflict detection, acceptance decisions, and final integration. The role name remains model-neutral; AgentMaxxing does not depend on how the user started the main session.
 
 ### Worker packet
 
@@ -18,11 +18,24 @@ A deliberately small context envelope that turns a broad request into an indepen
 
 ### LUNA worker
 
-Consumes the packet, performs the heavy work in isolation, validates and self-reviews, then returns a compact handoff.
+Consumes the packet, performs the heavy work in isolation, validates and self-reviews, then returns a compact handoff. Workers use `xhigh` for bounded, directly verifiable work and `max` for complex or cross-system work.
 
 ### Compact handoff
 
-Contains status, changed paths, result summary, validation evidence, and only material caveats.
+Contains status, changed paths, acceptance evidence, validation evidence, and only material caveats.
+
+### Acceptance gate
+
+The main agent returns `ACCEPT` or `REJECT` for every delegated stage. Rejected work returns to LUNA with failed acceptance IDs, concrete evidence, a narrow correction scope, and an exact recheck. A dependent stage cannot start before its prerequisite is accepted.
+
+```text
+main packet → LUNA execute/self-review → ready-for-review
+     ▲                                      │
+     └──── targeted correction ← REJECT ────┤
+                                            └── ACCEPT → integrate/unlock next stage
+```
+
+This loop preserves role separation: main reviews and integrates; LUNA implements and corrects. If a strategy stalls, main improves or splits the packet or escalates a fresh worker from `xhigh` to `max`; it does not lower the acceptance standard.
 
 ## Dynamic worker count
 
@@ -82,6 +95,12 @@ Response: require self-test/self-review first; independent review only when just
 Symptom: main opens every file/log after worker completion.
 
 Response: use the handoff as an index and inspect only integration-critical artifacts.
+
+### Premature stage progression
+
+Symptom: a dependent stage begins because a worker reported success even though a required behavior is unverified or defective.
+
+Response: treat worker completion as `ready-for-review`; continue correction until main explicitly accepts the stage or a real authorization, user-decision, or external-state blocker is reached.
 
 ## VisionOffload
 
