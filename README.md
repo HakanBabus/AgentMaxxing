@@ -22,31 +22,36 @@ AgentMaxxing is a lightweight orchestration skill built around one rule:
 
 The main agent first sizes the work. Tiny work stays direct, one bounded outcome can go to one LUNA, and compound deliverables become dependency-aware accepted stages. Workers receive small, explicit packets and return compact, verifiable results.
 
-## Core model
+## Why AgentMaxxing
 
-```mermaid
-flowchart LR
-    U([User]) --> M["MAIN<br/>goal · decisions · integration"]
-    M --> S{"Size work"}
-    S -- Tiny --> D[Work directly]
-    S -- Bounded --> P[Build bounded packet]
-    S -- Compound --> MAP[Build dependency-aware stage map]
-    MAP --> P
-    P --> W["Owning LUNA<br/>xhigh or max"]
-    W --> H[Evidence handoff]
-    H --> G{"ACCEPT?"}
-    G -- Yes --> N{"Accepted stages remain?"}
-    N -- Yes --> P
-    N -- No --> M
-    G -- No --> C[Targeted correction packet]
-    C --> OW[Same owning LUNA]
-    OW --> H
-    D --> M
-```
+AgentMaxxing is a token-conscious orchestration pattern built around **LUNA subagents**. It is designed to save expensive main-agent context and usage budget: the main agent keeps intent, decomposition, decisions, and acceptance, while LUNA `xhigh` or `max` workers carry bounded implementation, investigation, validation, and correction context.
+
+The goal is to reduce growth of the expensive main-agent context and spend more of the workload on a high-volume worker model. This is especially attractive to **ChatGPT Plus** users who want their included Codex allowance to cover more focused work. OpenAI's [official Codex pricing documentation](https://learn.chatgpt.com/docs/pricing) lists Codex and the GPT-5.6 family, including Luna, with Plus and describes Luna as the higher-usage option for lighter-weight or high-volume workloads.
+
+AgentMaxxing does not promise fewer total tokens for every task. Delegation, validation, and correction have overhead. It optimizes where context accumulates and which model performs the bulk of bounded work.
+
+| Layer | Responsibility |
+| --- | --- |
+| **Main agent** | Size the request, build the stage map, write precise packets, and decide `ACCEPT` or `REJECT` |
+| **LUNA fleet** | Execute bounded stages with `xhigh` or `max`, self-review, validate, and correct rejected work |
+| **Evidence handoff** | Return acceptance evidence and compact results instead of raw logs or full worker context |
+| **Acceptance gate** | Keep dependent stages locked until their prerequisites are explicitly accepted |
 
 There is no fixed worker limit. LUNA's low marginal cost lowers the threshold for useful delegation. Worker count follows real stage ownership and validation boundaries. Only concurrent workers must be independent; sequential stages may use fresh workers after their prerequisites are accepted.
 
-Worker completion is not automatic acceptance. A dependent stage stays locked until the main agent explicitly accepts its prerequisite.
+## Why not just use LUNA directly?
+
+A plain LUNA session is still the simplest choice for one small, bounded task. AgentMaxxing becomes more useful when the request is compound, long-running, quality-sensitive, or likely to overload one worker context.
+
+| Plain LUNA session | AgentMaxxing |
+| --- | --- |
+| One worker carries the full goal and execution history | Main keeps the goal while workers receive only stage-specific context |
+| A broad specification can become one overloaded task | Compound work is split into dependency-aware accepted stages |
+| The implementing worker is also the primary judge | Main applies an explicit acceptance gate; broad final-quality claims can receive fresh evaluation |
+| A failure often causes a broad retry | Rejection returns a narrow correction packet to the owning worker |
+| Context grows inside one long session | Heavy implementation details remain isolated behind compact handoffs |
+
+The advantage is not that LUNA becomes a different model. It is that LUNA receives cleaner assignments, works inside smaller contexts, and is supervised by an integration owner that will not advance incomplete work.
 
 ## Routing
 

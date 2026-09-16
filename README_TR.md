@@ -22,31 +22,36 @@ AgentMaxxing tek bir kural etrafında kurulmuş hafif bir orchestration skill'id
 
 Main agent önce işin boyutunu değerlendirir. Tiny işler doğrudan yapılır, tek bounded sonuç bir LUNA'ya gidebilir, compound deliverable'lar ise dependency-aware ve kabul kapılı aşamalara ayrılır. Worker'lar küçük ve açık packet'lar alıp kısa, doğrulanabilir sonuçlar döndürür.
 
-## Ana model
+## Neden AgentMaxxing?
 
-```mermaid
-flowchart LR
-    U([Kullanıcı]) --> M["MAIN<br/>hedef · karar · entegrasyon"]
-    M --> S{"İşi boyutlandır"}
-    S -- Tiny --> D[Main doğrudan yapar]
-    S -- Bounded --> P[Bounded packet hazırla]
-    S -- Compound --> MAP[Dependency-aware stage map hazırla]
-    MAP --> P
-    P --> W["İşin sahibi LUNA<br/>xhigh veya max"]
-    W --> H[Evidence handoff]
-    H --> G{"ACCEPT?"}
-    G -- Evet --> N{"Kabul bekleyen aşama var mı?"}
-    N -- Evet --> P
-    N -- Hayır --> M
-    G -- Hayır --> C[Targeted correction packet]
-    C --> OW[İşin sahibi olan aynı LUNA]
-    OW --> H
-    D --> M
-```
+AgentMaxxing, **LUNA alt ajanları** üzerine kurulu ve pahalı main-agent context/token bütçesinde tasarruf hedefleyen bir orchestration modelidir. Main agent amacı, decomposition'ı, kararları ve kabul sürecini korur; LUNA `xhigh` veya `max` worker'lar bounded implementation, araştırma, validation ve correction context'ini taşır.
+
+Amaç pahalı main-agent context'inin büyümesini azaltmak ve iş yükünün büyük bölümünü yüksek hacimli bir worker modele vermektir. Bu yaklaşım, dahilî Codex kullanım hakkından daha fazla odaklı iş çıkarmak isteyen **ChatGPT Plus** kullanıcıları için özellikle caziptir. OpenAI'ın [resmî Codex fiyatlandırma belgesi](https://learn.chatgpt.com/docs/pricing), Plus kapsamında Codex ile Luna dahil GPT-5.6 ailesini listeler ve Luna'yı hafif veya yüksek hacimli işler için daha yüksek kullanım seçeneği olarak tanımlar.
+
+AgentMaxxing her görevde daha az toplam token garantisi vermez. Delegation, validation ve correction'ın da maliyeti vardır. Sistem, context'in nerede biriktiğini ve bounded işin büyük bölümünü hangi modelin yaptığını optimize eder.
+
+| Katman | Sorumluluk |
+| --- | --- |
+| **Main agent** | İşi boyutlandırır, stage map hazırlar, net packet'lar yazar ve `ACCEPT` veya `REJECT` kararı verir |
+| **LUNA filosu** | Bounded aşamaları `xhigh` veya `max` ile uygular, self-review ve validation yapar, reddedilen işi düzeltir |
+| **Evidence handoff** | Raw log veya bütün worker context'i yerine acceptance kanıtı ve compact sonuç döndürür |
+| **Acceptance gate** | Önkoşulları açıkça kabul edilmeden bağımlı aşamaları kilitli tutar |
 
 Sabit bir worker limiti yoktur. LUNA'nın düşük marjinal maliyeti faydalı delegasyon eşiğini düşürür. Worker sayısını gerçek stage ownership ve validation sınırları belirler. Yalnızca eşzamanlı worker'ların bağımsız olması gerekir; sıralı aşamalar, önkoşulları kabul edildikten sonra fresh worker'lara verilebilir.
 
-Worker'ın işi bitirmesi otomatik kabul değildir. Main agent önkoşul aşamasını açıkça kabul etmeden bağımlı sonraki aşama başlayamaz.
+## Neden doğrudan LUNA kullanmıyoruz?
+
+Tek, küçük ve bounded bir görevde düz LUNA oturumu hâlâ en basit seçenektir. İstek compound, uzun süreli, kalite hassasiyetli veya tek worker context'ini aşabilecek durumdaysa AgentMaxxing daha faydalı hâle gelir.
+
+| Düz LUNA oturumu | AgentMaxxing |
+| --- | --- |
+| Tek worker bütün hedefi ve execution geçmişini taşır | Main hedefi tutar; worker'lar yalnızca kendi aşamalarının context'ini alır |
+| Geniş bir şartname tek overloaded göreve dönüşebilir | Compound iş dependency-aware ve kabul kapılı aşamalara ayrılır |
+| Implementation yapan worker aynı zamanda temel değerlendiricidir | Main açık acceptance gate uygular; geniş final-quality iddiaları fresh evaluator alabilir |
+| Hata genellikle geniş bir retry üretir | Red, işin sahibi worker'a dar bir correction packet olarak döner |
+| Context tek uzun oturumda büyür | Ağır implementation ayrıntıları compact handoff'ların arkasında izole kalır |
+
+Avantaj, LUNA'nın farklı bir modele dönüşmesi değildir. LUNA daha temiz görevler alır, daha küçük context'lerde çalışır ve eksik işin ilerlemesine izin vermeyen bir integration owner tarafından denetlenir.
 
 ## Routing
 
