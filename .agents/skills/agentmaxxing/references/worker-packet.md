@@ -12,6 +12,12 @@ Role: LUNA worker
 Reasoning:
 xhigh | max
 
+Stage:
+<stage ID and bounded outcome>
+
+Depends on:
+<accepted prerequisite IDs or none>
+
 Goal:
 <one concrete outcome>
 
@@ -25,6 +31,9 @@ Scope:
 - May inspect: <...>
 - May edit: <...>
 - Must not edit: <...>
+
+Later stages / not this task:
+- <work deliberately excluded from this packet>
 
 Suggested steps:
 1. <first useful step>
@@ -107,6 +116,8 @@ Return the correction to the same worker while the bounded context remains usefu
 
 Do not solve an overloaded packet by dumping the entire project into LUNA.
 
+One directory, repository, document, migration, release, or final artifact is not automatically one bounded task. Do not combine several lifecycle phases or materially different quality and validation surfaces merely because they contribute to one requested outcome.
+
 Instead ask:
 
 1. Can the task be split into independent outputs?
@@ -116,3 +127,5 @@ Instead ask:
 5. Can another worker own a truly separate workstream?
 
 Split only along real boundaries. Artificial fragmentation increases duplicated context.
+
+Prefer a dependency-aware sequence when later work relies on earlier accepted output. A fresh worker can own the next stage; the same worker should retain corrections within its current stage. For compound final-quality claims, add a separate read-only evaluation packet after all prerequisite stages are accepted.

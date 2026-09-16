@@ -1,6 +1,6 @@
 ---
 name: agentmaxxing
-description: Keep the main coding agent context small by selectively delegating heavy, bounded, or independent repository work to well-scoped LUNA workers. Use when the user explicitly invokes $agentmaxxing or explicitly asks to use AgentMaxxing. Prefer direct work for small tasks; use multiple workers only when their scopes are genuinely independent and context duplication is lower than the delegation benefit.
+description: Keep the main coding agent context small by sizing non-trivial work, decomposing compound deliverables into accepted stages, and routing bounded execution to well-scoped LUNA workers. Use when the user explicitly invokes $agentmaxxing or explicitly asks to use AgentMaxxing. Keep tiny work direct; use sequential or parallel LUNA workers according to dependencies, ownership, and validation boundaries.
 ---
 
 # AgentMaxxing
@@ -11,20 +11,22 @@ AgentMaxxing is context-first, not agent-count-first.
 
 ## Core rules
 
-1. **Do small work directly.** Delegation has overhead.
-2. **Delegate heavy bounded context.** Logs, broad exploration, focused implementation, tests, research, and other isolated work can stay inside workers.
-3. **Use LUNA workers.** Use `gpt-5.6-luna` with either `xhigh` or `max` reasoning according to task complexity.
-4. **No arbitrary worker cap.** Use as many workers as the task genuinely benefits from, but avoid duplicate context and overlapping ownership.
-5. **Resolve ambiguity before delegation.** LUNA should receive a precise task packet, not a vague goal.
-6. **Worker self-check first.** The worker that performs a bounded task should test and review its own result before main review or another reviewer is considered.
-7. **Gate every delegated stage.** The main agent must explicitly accept a delegated result before integration or any dependent stage begins.
-8. **Reject back to LUNA.** When the main agent rejects a result, return a targeted correction packet to LUNA; do not silently skip the issue or take over the delegated implementation merely to avoid another worker pass.
-9. **Return compact handoffs.** Do not bring raw logs, full transcripts, giant analyses, or unrelated exploration back into main context.
-10. **Main owns integration.** Delegation transfers bounded execution, not accountability.
+1. **Size before routing.** Decide whether the request is tiny, one bounded outcome, or a compound deliverable before creating a worker packet.
+2. **Do tiny work directly.** Delegation still has coordination cost.
+3. **Decompose compound work.** Turn broad outcomes into a dependency-aware stage map with measurable acceptance gates.
+4. **Delegate bounded execution.** Logs, broad exploration, focused implementation, tests, research, polish, and other isolated work can stay inside workers.
+5. **Use LUNA workers.** Use `gpt-5.6-luna` with either `xhigh` or `max` reasoning according to task complexity.
+6. **No arbitrary worker cap.** LUNA's low marginal cost lowers the threshold for useful delegation; ownership clarity, context duplication, and validation boundaries determine worker count.
+7. **Resolve ambiguity before delegation.** LUNA should receive a precise task packet, not a vague goal or an entire product specification disguised as one task.
+8. **Worker self-check first.** The worker that performs a bounded task should test and review its own result before main review or another reviewer is considered.
+9. **Gate every delegated stage.** The main agent must explicitly accept a delegated result before integration or any dependent stage begins.
+10. **Reject back to LUNA.** When the main agent rejects a result, return a targeted correction packet to LUNA; do not silently skip the issue or take over the delegated implementation merely to avoid another worker pass.
+11. **Return compact handoffs.** Do not bring raw logs, full transcripts, giant analyses, or unrelated exploration back into main context.
+12. **Main owns integration.** Delegation transfers bounded execution, not accountability.
 
 ## Decide whether to delegate
 
-Work directly when the task is small, tightly coupled to context already loaded by the main agent, or cheaper to finish than to explain to a worker.
+Work directly when the task is tiny, tightly coupled to context already loaded by the main agent, and cheaper to finish than to explain to a worker.
 
 Delegate when one or more of these are true:
 
@@ -35,27 +37,54 @@ Delegate when one or more of these are true:
 - research or repository exploration can be summarized into a compact result;
 - the main agent needs isolation more than it needs every intermediate detail.
 
-Do not delegate merely because a worker exists.
+Because LUNA workers are inexpensive, prefer a useful bounded delegation over keeping substantial execution in the main context. Do not create duplicate workers without distinct ownership or evidence value.
+
+## Size and decompose the work
+
+Do not infer task size from the number of requested output folders, repositories, files, or final artifacts. One output can still contain many architectural, implementation, quality, and validation stages.
+
+Treat a request as compound when several of these are present:
+
+- multiple subsystems, packages, surfaces, audiences, or deliverable types;
+- discovery, architecture, implementation, content, migration, polish, and validation mixed together;
+- several user flows, platforms, environments, or operating modes;
+- both objective correctness and subjective quality requirements;
+- a greenfield or end-to-end result described as complete, production-ready, polished, final, or equivalent;
+- acceptance that requires materially different test or review methods;
+- enough work that one worker would need several internal milestones before it could prove the result.
+
+Before delegating compound work, create a compact stage map. Each stage must have:
+
+- one bounded outcome;
+- dependencies and accepted inputs;
+- worker ownership and `xhigh` or `max` effort;
+- non-overlapping write scope while active;
+- measurable acceptance and validation;
+- an explicit statement of what belongs to later stages.
+
+The stage map is orchestration state in the main context, not a persistent task database. Read [references/routing.md](references/routing.md) for sizing and decomposition rules.
 
 ## Multiple workers
 
 There is no fixed worker limit.
 
-Before spawning more than one worker, verify that the tasks are meaningfully independent. Prefer parallel workers when they can operate with different inputs or non-overlapping write scopes.
+Use multiple workers across a compound task even when its stages are sequential. Independence is required for parallel execution, not for assigning later accepted stages to fresh workers.
+
+Before spawning workers concurrently, verify that their tasks are meaningfully independent. Prefer parallel workers when they can operate with different inputs or non-overlapping write scopes.
 
 Avoid:
 
 - assigning the same file to multiple active writers;
 - asking several workers to rediscover the same architecture;
 - opening a reviewer before the implementing worker has tested and self-reviewed;
-- splitting one tightly coupled change into artificial fragments;
+- splitting one tightly coupled change into artificial parallel fragments;
 - spawning workers whose combined task packets duplicate more context than they isolate.
 
 If task B depends on task A, keep them sequential or resume the appropriate worker when supported.
 
 Do not start task B until the main agent has explicitly accepted task A. A successful worker status is a review request, not automatic acceptance.
 
-A new independent task should normally receive a fresh worker so old worker context does not become a second giant session.
+A new stage should normally receive a fresh worker when its goal, context, or validation surface materially differs from the accepted prerequisite. Resume the same worker for corrections and true continuation inside one bounded stage.
 
 ## Build a strong LUNA packet
 
@@ -103,7 +132,7 @@ Ask the worker to:
 
 The worker must not mark a stage ready while a required criterion is knowingly unmet. If completion requires user input, new authorization, unavailable external state, or a materially different scope, return `needs-input` with the exact blocker.
 
-A separate reviewer worker is optional, not default. Use one only when independent evaluation has clear value, such as security-sensitive work, consequential architecture, suspicious validation, or explicit user request.
+For a single bounded stage, a separate reviewer remains optional. For a compound deliverable that claims end-to-end, final, polished, production-ready, migration-complete, or similarly broad quality, normally use a fresh LUNA evaluator for independent final validation. Give it a bounded evaluation packet and no write ownership; return defects to the owning implementation stage.
 
 ## Compact handoff
 

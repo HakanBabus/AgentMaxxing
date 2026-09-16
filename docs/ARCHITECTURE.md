@@ -8,6 +8,14 @@ Reduce unnecessary growth of the main agent context while preserving one clear i
 
 ## Components
 
+### Workload sizing gate
+
+Classifies the request as tiny, bounded, or compound before worker packets are created. It considers systems, lifecycle phases, quality dimensions, environments, and validation methods rather than counting output files or directories.
+
+### Stage map
+
+Represents a compound deliverable as dependency-aware bounded outcomes. Each stage records ownership, effort, accepted prerequisites, scope, acceptance, validation, and work deliberately deferred to later stages. The map stays compact in main context and is not a persistent orchestration registry.
+
 ### Main agent
 
 Owns user intent, decomposition, architectural decisions, conflict detection, acceptance decisions, and final integration. The role name remains model-neutral; AgentMaxxing does not depend on how the user started the main session.
@@ -48,13 +56,15 @@ benefit = isolated heavy context + useful independent progress
 cost    = duplicated context + coordination + conflicting ownership
 ```
 
-Spawn another worker only when expected benefit is clearly higher than cost.
+LUNA's low marginal cost lowers the threshold for useful delegation. Spawn another worker when it creates a clearer ownership, context, execution, correction, or validation boundary. Avoid workers whose only effect is duplicated reading or conflicting ownership.
 
 This usually means:
 
 - 0 workers for tiny work;
 - 1 worker for one bounded heavy task;
-- N workers for N genuinely independent heavy workstreams.
+- several sequential workers for a compound dependency chain;
+- parallel workers only for genuinely independent workstreams;
+- a fresh read-only evaluator for broad end-to-end quality claims.
 
 ## Context boundaries
 
@@ -65,6 +75,12 @@ Workers should not receive the complete main conversation unless the task genuin
 The architecture minimizes context movement in both directions.
 
 ## Failure modes
+
+### Under-decomposition
+
+Symptom: one worker receives a detailed end-to-end specification spanning several systems, lifecycle phases, quality dimensions, or validation methods.
+
+Response: stop treating one output location as one bounded task. Build a stage map, keep corrections with each stage owner, and unlock dependent stages only after acceptance.
 
 ### Vague packet
 
@@ -88,7 +104,7 @@ Response: use fresh workers for new independent tasks.
 
 Symptom: every worker gets another worker just to review it.
 
-Response: require self-test/self-review first; independent review only when justified.
+Response: require self-test/self-review first. Use independent review for compound end-to-end quality or other cases where a fresh perspective has concrete evidence value, not mechanically for every bounded stage.
 
 ### Main re-reading everything
 

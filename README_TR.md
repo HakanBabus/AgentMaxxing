@@ -20,31 +20,31 @@ AgentMaxxing tek bir kural etrafında kurulmuş hafif bir orchestration skill'id
 
 > **Ana ajan hedefi, kararları, kabul sürecini ve entegrasyon context'ini tutar. Ağır ve sınırları belli işler LUNA worker'lara gider.**
 
-Worker'lar küçük ve açık task packet'ları alır, kısa ve doğrulanabilir sonuçlar döndürür. AgentMaxxing'in amacı ajan sayısını artırmak değil, yinelenen context'i azaltmaktır.
+Main agent önce işin boyutunu değerlendirir. Tiny işler doğrudan yapılır, tek bounded sonuç bir LUNA'ya gidebilir, compound deliverable'lar ise dependency-aware ve kabul kapılı aşamalara ayrılır. Worker'lar küçük ve açık packet'lar alıp kısa, doğrulanabilir sonuçlar döndürür.
 
 ## Ana model
 
 ```mermaid
 flowchart LR
     U([Kullanıcı]) --> M["MAIN<br/>hedef · karar · entegrasyon"]
-    M --> R{"Delege edilmeli mi?"}
-    R -- Hayır --> D[Main doğrudan yapar]
-    R -- Evet --> P[Bounded packet hazırla]
-    P --> W1[LUNA]
-    P --> W2[LUNA]
-    P --> WN["LUNA …"]
-    W1 --> H[Evidence handoff]
-    W2 --> H
-    WN --> H
+    M --> S{"İşi boyutlandır"}
+    S -- Tiny --> D[Main doğrudan yapar]
+    S -- Bounded --> P[Bounded packet hazırla]
+    S -- Compound --> MAP[Dependency-aware stage map hazırla]
+    MAP --> P
+    P --> W["İşin sahibi LUNA<br/>xhigh veya max"]
+    W --> H[Evidence handoff]
     H --> G{"ACCEPT?"}
-    G -- Evet --> M
+    G -- Evet --> N{"Kabul bekleyen aşama var mı?"}
+    N -- Evet --> P
+    N -- Hayır --> M
     G -- Hayır --> C[Targeted correction packet]
     C --> OW[İşin sahibi olan aynı LUNA]
     OW --> H
     D --> M
 ```
 
-Sabit bir worker limiti yoktur. Yeni worker yalnızca işi gerçekten bağımsızsa ve kazandırdığı context, koordinasyon maliyetinden yüksekse açılır.
+Sabit bir worker limiti yoktur. LUNA'nın düşük marjinal maliyeti faydalı delegasyon eşiğini düşürür. Worker sayısını gerçek stage ownership ve validation sınırları belirler. Yalnızca eşzamanlı worker'ların bağımsız olması gerekir; sıralı aşamalar, önkoşulları kabul edildikten sonra fresh worker'lara verilebilir.
 
 Worker'ın işi bitirmesi otomatik kabul değildir. Main agent önkoşul aşamasını açıkça kabul etmeden bağımlı sonraki aşama başlayamaz.
 
@@ -54,11 +54,29 @@ Worker'ın işi bitirmesi otomatik kabul değildir. Main agent önkoşul aşamas
 | --- | --- |
 | Küçük veya sıkı bağlı task | Main doğrudan yapar |
 | Tek ağır ve bounded task | Tek LUNA worker |
-| Bağımsız ağır iş akışları | Birden fazla LUNA worker |
-| Sıralı bağımlılıklar | Önkoşul aşamasını kabul etmeden sıradakine geçme |
-| Güvenlik hassas veya yüksek riskli review | Yalnızca gerekçeliyse bağımsız reviewer ekle |
+| Compound deliverable | Dependency-aware stage map hazırla |
+| Sıralı aşamalar | Sonraki kabul edilmiş aşamaları fresh worker'lar üstlenebilir |
+| Bağımsız iş akışları | Çakışmayan LUNA worker'ları paralel çalıştır |
+| Geniş final-quality iddiası | Fresh, read-only end-to-end evaluator kullan |
 
 Çakışan dosya sahipliğinden, tekrarlanan repo keşfinden ve somut gerekçe olmadan worker'a bütün konuşmayı vermekten kaçın.
+
+## İş boyutlandırma
+
+İşin boyutunu istenen dosya, klasör, repository veya final artefact sayısından çıkarma. Tek bir çıktı bile birkaç gerçek aşama içerebilir.
+
+Şunlardan birkaçını bir araya getiren işleri compound kabul et:
+
+- subsystem, package, surface, audience veya deliverable türleri;
+- discovery, architecture, implementation, content, migration, polish ve validation;
+- user flow, platform, environment veya operating mode;
+- objective correctness ile subjective quality;
+- birbirinden farklı validation yöntemleri;
+- complete, final, polished veya production-ready olarak tarif edilen greenfield ya da end-to-end sonuç.
+
+Compound işlerde main compact bir stage map hazırlar. Her aşama; tek bounded outcome, dependency, worker ownership, `xhigh` veya `max` effort, write scope, ölçülebilir acceptance, validation ve o packet'ın dışında bırakılan sonraki işleri içerir.
+
+Detaylı requirements, overloaded bir görevi bounded yapmaz. Bir aşamadaki düzeltmeler için aynı worker'ı kullan; sonraki kabul edilmiş aşamanın hedefi, context'i veya validation yüzeyi değişiyorsa normalde fresh worker aç.
 
 ## Sorumluluklar
 
@@ -69,6 +87,7 @@ Main agent şunların sahibidir:
 - kullanıcı amacı ve kısıtları;
 - mimari kararlar;
 - task decomposition ve worker ownership;
+- workload sizing ve compact stage map;
 - çakışma tespiti;
 - final entegrasyon ve doğrulama;
 - delege edilen aşamalar için açık `ACCEPT` veya `REJECT` kararı;
@@ -94,6 +113,8 @@ reasoning: xhigh | max
 
 Stabil interface'lere ve doğrudan validation'a sahip bounded işlerde **xhigh** kullan. Birden fazla sistemi etkileyen implementation, architecture-heavy işler, UI/input/render etkileşimi, nondeterministic hata ve pahalı regression riskinde **max** kullan. xhigh aynı önemli gereksinimi tekrar tekrar kaçırırsa görevi yeniden çerçevele veya gerçek sınırlardan böl; yalnızca gerekli correction context'ini fresh bir max worker'a ver.
 
+Tek bounded aşamada independent review opsiyoneldir. Geniş end-to-end veya final quality iddiası taşıyan compound işlerde fresh bir LUNA evaluator, kabul edilmiş aşamaları write ownership almadan birlikte doğrulamalıdır. Kusurlar etkilenen aşamanın sahibi worker'a geri döner.
+
 ## Worker packet
 
 Delegasyondan önce belirsizliği kaldır. Kullanışlı bir packet şu şekildedir:
@@ -103,6 +124,12 @@ Role: LUNA worker
 
 Reasoning:
 xhigh | max
+
+Stage:
+<stage ID ve bounded outcome>
+
+Depends on:
+<kabul edilmiş prerequisite ID'leri veya none>
 
 Goal:
 <tek ve somut sonuç>
@@ -117,6 +144,9 @@ Scope:
 - May inspect: <...>
 - May edit: <...>
 - Must not edit: <...>
+
+Later stages / not this task:
+- <bu packet'ın dışında bırakılan sonraki işler>
 
 Suggested steps:
 1. <ilk faydalı adım>

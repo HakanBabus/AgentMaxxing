@@ -1,6 +1,48 @@
 # Routing
 
-AgentMaxxing routes for context efficiency, not agent count.
+AgentMaxxing sizes work before routing. Worker count follows real execution and validation boundaries, not a desire to minimize or maximize agent count.
+
+## Workload sizing gate
+
+Classify the request before creating worker packets:
+
+### Tiny
+
+One obvious change, little new context, and one direct check. Main can usually handle it.
+
+### Bounded
+
+One primary outcome, one coherent ownership surface, stable inputs, and a validation method that can prove completion. Use one worker when delegation keeps useful context out of main.
+
+### Compound
+
+Several systems, phases, quality dimensions, environments, deliverable types, or validation methods contribute to the requested result. Create a stage map and use multiple workers across its lifecycle.
+
+A task is not bounded merely because it targets one repository, directory, document, or artifact. A detailed requirements list can still be an overloaded packet.
+
+Strong compound-work signals include:
+
+- discovery plus implementation;
+- architecture plus several implementation surfaces;
+- correctness plus design, content, usability, performance, or polish;
+- multiple platforms, user flows, migrations, or operating modes;
+- a greenfield or end-to-end final deliverable;
+- validation that needs different tools or an independent perspective.
+
+When uncertain between bounded and compound, sketch the stage map first. If several independently acceptable milestones appear, route them as stages rather than hiding them inside one worker.
+
+## Stage map
+
+Keep the map compact:
+
+```text
+S1 — outcome | depends on: none | owner: LUNA max | acceptance: A1-A3
+S2 — outcome | depends on: S1 ACCEPT | owner: fresh LUNA max | acceptance: A4-A6
+S3 — outcome | depends on: S1 ACCEPT | owner: LUNA xhigh | acceptance: A7-A8
+F1 — end-to-end evaluation | depends on: all ACCEPT | owner: fresh LUNA | read-only
+```
+
+Do not persist this map unless the user or project has a concrete need for it.
 
 ## Direct work
 
@@ -15,10 +57,13 @@ Prefer main-agent execution when:
 
 Prefer one LUNA worker when:
 
+- the request passed the workload sizing gate as bounded;
 - a bounded implementation has stable requirements;
 - one log/test/research surface is heavy;
 - repository exploration can be isolated and summarized;
 - the worker can complete, test, and self-review one coherent outcome.
+
+Do not use one worker for a compound request merely because its requirements are detailed or all outputs live in one place.
 
 ## Reasoning effort
 
@@ -36,7 +81,9 @@ Choose the effort before spawning the worker. If an `xhigh` pass repeatedly miss
 
 ## Multiple workers
 
-Use multiple workers when workstreams are genuinely independent.
+Use multiple workers across compound work. They may be sequential or parallel.
+
+Use sequential workers when later stages depend on accepted earlier results. Use parallel workers only when workstreams are genuinely independent.
 
 Good boundaries include:
 
@@ -84,19 +131,18 @@ If correction stalls, change the strategy rather than the standard: improve the 
 
 ## Reviewer worker
 
-Do not open a reviewer by default.
-
 The implementing worker must first test and self-review.
 
-Independent review can be justified by:
+Independent review is optional for one bounded stage. It is normally expected for a compound deliverable that claims broad end-to-end or final quality, and can also be justified by:
 
 - security-sensitive changes;
 - data-loss risk;
 - architecture with expensive rollback;
 - unclear or suspicious test results;
+- results whose quality spans different validation methods or needs an independent perspective;
 - explicit user request.
 
-Give the reviewer a bounded review question, not the entire project history.
+Give the evaluator accepted-stage summaries, end-to-end criteria, exact commands or artifacts, and a bounded review question rather than the entire project history. It should not edit. Return defects to the worker that owns the affected stage.
 
 ## Stop rule
 

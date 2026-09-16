@@ -20,31 +20,31 @@ AgentMaxxing is a lightweight orchestration skill built around one rule:
 
 > **The main agent keeps the goal, decisions, acceptance, and integration context. Heavy bounded work goes to LUNA workers.**
 
-Workers receive small, explicit task packets and return compact, verifiable results. AgentMaxxing does not maximize agent count; it minimizes duplicated context.
+The main agent first sizes the work. Tiny work stays direct, one bounded outcome can go to one LUNA, and compound deliverables become dependency-aware accepted stages. Workers receive small, explicit packets and return compact, verifiable results.
 
 ## Core model
 
 ```mermaid
 flowchart LR
     U([User]) --> M["MAIN<br/>goal · decisions · integration"]
-    M --> R{"Delegate?"}
-    R -- No --> D[Work directly]
-    R -- Yes --> P[Build bounded packet]
-    P --> W1[LUNA]
-    P --> W2[LUNA]
-    P --> WN["LUNA …"]
-    W1 --> H[Evidence handoff]
-    W2 --> H
-    WN --> H
+    M --> S{"Size work"}
+    S -- Tiny --> D[Work directly]
+    S -- Bounded --> P[Build bounded packet]
+    S -- Compound --> MAP[Build dependency-aware stage map]
+    MAP --> P
+    P --> W["Owning LUNA<br/>xhigh or max"]
+    W --> H[Evidence handoff]
     H --> G{"ACCEPT?"}
-    G -- Yes --> M
+    G -- Yes --> N{"Accepted stages remain?"}
+    N -- Yes --> P
+    N -- No --> M
     G -- No --> C[Targeted correction packet]
     C --> OW[Same owning LUNA]
     OW --> H
     D --> M
 ```
 
-There is no fixed worker limit. Use another worker only when its work is genuinely independent and the context saved is worth the coordination cost.
+There is no fixed worker limit. LUNA's low marginal cost lowers the threshold for useful delegation. Worker count follows real stage ownership and validation boundaries. Only concurrent workers must be independent; sequential stages may use fresh workers after their prerequisites are accepted.
 
 Worker completion is not automatic acceptance. A dependent stage stays locked until the main agent explicitly accepts its prerequisite.
 
@@ -54,11 +54,29 @@ Worker completion is not automatic acceptance. A dependent stage stays locked un
 | --- | --- |
 | Tiny or tightly coupled task | Main handles it directly |
 | One heavy, bounded task | One LUNA worker |
-| Independent heavy workstreams | Multiple LUNA workers |
-| Sequential dependencies | Accept the prerequisite before starting the next stage |
-| Security-sensitive or high-risk review | Add an independent reviewer only when justified |
+| Compound deliverable | Build a dependency-aware stage map |
+| Sequential stages | Fresh workers may own later accepted stages |
+| Independent workstreams | Run non-overlapping LUNA workers in parallel |
+| Broad final-quality claim | Fresh read-only end-to-end evaluator |
 
 Avoid overlapping write ownership, repeated repository discovery, and workers that receive the full conversation without a concrete need.
+
+## Workload sizing
+
+Do not estimate work from the number of requested files, folders, repositories, or final artifacts. One output can still contain several real stages.
+
+Treat work as compound when it mixes several of these:
+
+- subsystems, packages, surfaces, audiences, or deliverable types;
+- discovery, architecture, implementation, content, migration, polish, and validation;
+- user flows, platforms, environments, or operating modes;
+- objective correctness and subjective quality;
+- materially different validation methods;
+- a greenfield or end-to-end result described as complete, final, polished, or production-ready.
+
+For compound work, main creates a compact stage map. Every stage gets one bounded outcome, dependencies, worker ownership, `xhigh` or `max` effort, write scope, measurable acceptance, validation, and an explicit list of later work excluded from that packet.
+
+Detailed requirements do not make an overloaded task bounded. Use the same worker for corrections inside a stage; normally use a fresh worker when the next accepted stage has a different goal, context, or validation surface.
 
 ## Responsibilities
 
@@ -69,6 +87,7 @@ The main agent owns:
 - user intent and constraints;
 - architectural decisions;
 - task decomposition and worker ownership;
+- workload sizing and the compact stage map;
 - conflict detection;
 - final integration and validation;
 - explicit `ACCEPT` or `REJECT` decisions for delegated stages;
@@ -94,6 +113,8 @@ reasoning: xhigh | max
 
 Use **xhigh** for bounded work with stable interfaces and direct validation. Use **max** for cross-system implementation, architecture-heavy work, UI/input/render interactions, nondeterministic failures, and expensive regressions. If xhigh repeatedly misses the same material requirement, reframe or split the task and send the smallest sufficient correction context to a fresh max worker.
 
+For one bounded stage, independent review is optional. For compound work claiming broad end-to-end or final quality, a fresh LUNA evaluator should normally validate the accepted stages together without taking write ownership. Defects return to the worker that owns the affected stage.
+
 ## Worker packet
 
 Before delegating, remove ambiguity. A useful packet looks like this:
@@ -103,6 +124,12 @@ Role: LUNA worker
 
 Reasoning:
 xhigh | max
+
+Stage:
+<stage ID and bounded outcome>
+
+Depends on:
+<accepted prerequisite IDs or none>
 
 Goal:
 <one concrete outcome>
@@ -117,6 +144,9 @@ Scope:
 - May inspect: <...>
 - May edit: <...>
 - Must not edit: <...>
+
+Later stages / not this task:
+- <work deliberately excluded from this packet>
 
 Suggested steps:
 1. <first useful step>
