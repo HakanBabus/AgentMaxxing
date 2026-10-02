@@ -1,19 +1,25 @@
 # Changelog
 
-## Unreleased — Main-gated LUNA execution
+## Unreleased — Single-agent work and project memory
 
-- Kept the orchestrator role model-neutral as the main agent.
-- Added a general workload-sizing gate for tiny, bounded, and compound requests.
-- Required compound deliverables to become dependency-aware accepted stage maps instead of overloaded single-worker packets.
-- Clarified that sequential stages can use multiple fresh workers; only concurrent workers require independence.
-- Lowered the threshold for useful LUNA delegation while preserving clear ownership and compact context.
-- Added adaptive LUNA routing between `xhigh` and `max` reasoning.
-- Added numbered acceptance criteria and compact criterion-to-evidence handoffs.
-- Required explicit main-agent `ACCEPT` or `REJECT` decisions for every delegated stage.
-- Required rejected work to return to LUNA with a targeted correction packet and delta handoff.
-- Prevented dependent stages from starting before their prerequisites are accepted.
-- Made fresh read-only end-to-end evaluation the normal route for compound final-quality claims.
-- Preserved the lightweight instruction-only design with no runtime, logs, database, telemetry, or persistent task system.
+- Made direct single-agent execution the default, including compound staged work.
+- Replaced LUNA delegation with optional `gpt-6-astra` workers: low for small,
+  clear tasks and medium for broader work; medium is the worker ceiling.
+- Kept the main session's user-selected model and effort unchanged.
+- Separated task decomposition from worker creation and made independent review
+  conditional on concrete risk or missing evidence.
+- Preserved compact packets, self-checks, evidence handoffs, and main acceptance
+  before dependent work.
+- Allowed explicit transfer of correction ownership to main when appropriate.
+- Added a lightweight project-memory protocol for future work, release checks,
+  current direction, and decision history, with existing-document reuse.
+- Added this repository's project notes and aligned both README languages.
+- Added safe first-use orientation for existing projects with missing, partial,
+  or stale memory, without guessing history or disturbing in-progress work.
+- Made memory compaction preserve unique information and link retained detail.
+- Redesigned both README files with quick navigation, workflow diagrams,
+  first-use examples, and a compact memory guide.
+- Preserved the instruction-only design and explicit skill invocation policy.
 
 ## 0.2.0 — Context-first redesign
 

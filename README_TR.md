@@ -2,263 +2,203 @@
 
 # ⚡ AgentMaxxing
 
-### Ana ajanı keskin tut. Ağır işi dışarı aktar.
+**Odaklı uygulama. Faydalı delegasyon. Kalıcı proje yönü.**
 
-**Codex tarzı coding workflow'lar için context-efficient delegasyon.**
+**Tek ajanla çalışma**, isteğe bağlı **Astra low/medium alt ajanları** ve **kısa proje hafızası** için hafif bir Codex skill'i.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-![Status](https://img.shields.io/badge/status-experimental-orange)
-![Workers](https://img.shields.io/badge/workers-LUNA-7c3aed)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![Default](https://img.shields.io/badge/default-single%20agent-2563eb)
+![Workers](https://img.shields.io/badge/workers-Astra%20low%20%2F%20medium-7c3aed)
+![Memory](https://img.shields.io/badge/memory-Markdown-059669)
 
 [English](README.md) · [Türkçe](README_TR.md)
+
+[Başlangıç](#hızlı-başlangıç) · [İş akışı](#çalışma-akışı) · [İlk kullanım](#projeye-ortadan-katılma) · [Alt ajanlar](#alt-ajan-seçimi) · [Hafıza](#küçük-hafıza-korunan-bilgi)
 
 </div>
 
 ---
 
-AgentMaxxing tek bir kural etrafında kurulmuş hafif bir orchestration skill'idir:
+> **İşi odaklı, kararları kalıcı tut.** Varsayılan olarak tek ajanla çalış, fayda sağlayan sınırlı işleri delege et ve gelecek işleri sohbet geçmişinde kaybolmadan kaydet.
 
-> **Ana ajan hedefi, kararları, kabul sürecini ve entegrasyon context'ini tutar. Ağır ve sınırları belli işler LUNA worker'lara gider.**
+| Uygulama | Alt ajanlar | Süreklilik |
+| --- | --- | --- |
+| **Tek entegrasyon sahibi** | **Astra low veya medium** | **Kısa, kaynaklı Markdown notları** |
+| Aşamaları otomatik alt ajan açmadan planla | Seviyeyi göreve uyarla; üst sınır medium | Amaç, koşul ve kanıtı oturumlar arasında koru |
 
-Main agent önce işin boyutunu değerlendirir. Tiny işler doğrudan yapılır, tek bounded sonuç bir LUNA'ya gidebilir, compound deliverable'lar ise dependency-aware ve kabul kapılı aşamalara ayrılır. Worker'lar küçük ve açık packet'lar alıp kısa, doğrulanabilir sonuçlar döndürür.
+## Hızlı başlangıç
 
-## Neden AgentMaxxing?
-
-AgentMaxxing, **LUNA alt ajanları** üzerine kurulu ve pahalı main-agent context/token bütçesinde tasarruf hedefleyen bir orchestration modelidir. Main agent amacı, decomposition'ı, kararları ve kabul sürecini korur; LUNA `xhigh` veya `max` worker'lar bounded implementation, araştırma, validation ve correction context'ini taşır.
-
-Amaç pahalı main-agent context'inin büyümesini azaltmak ve iş yükünün büyük bölümünü yüksek hacimli bir worker modele vermektir. Bu yaklaşım, dahilî Codex kullanım hakkından daha fazla odaklı iş çıkarmak isteyen **ChatGPT Plus** kullanıcıları için özellikle caziptir. OpenAI'ın [resmî Codex fiyatlandırma belgesi](https://learn.chatgpt.com/docs/pricing), Plus kapsamında Codex ile Luna dahil GPT-5.6 ailesini listeler ve Luna'yı hafif veya yüksek hacimli işler için daha yüksek kullanım seçeneği olarak tanımlar.
-
-AgentMaxxing her görevde daha az toplam token garantisi vermez. Delegation, validation ve correction'ın da maliyeti vardır. Sistem, context'in nerede biriktiğini ve bounded işin büyük bölümünü hangi modelin yaptığını optimize eder.
-
-| Katman | Sorumluluk |
-| --- | --- |
-| **Main agent** | İşi boyutlandırır, stage map hazırlar, net packet'lar yazar ve `ACCEPT` veya `REJECT` kararı verir |
-| **LUNA filosu** | Bounded aşamaları `xhigh` veya `max` ile uygular, self-review ve validation yapar, reddedilen işi düzeltir |
-| **Evidence handoff** | Raw log veya bütün worker context'i yerine acceptance kanıtı ve compact sonuç döndürür |
-| **Acceptance gate** | Önkoşulları açıkça kabul edilmeden bağımlı aşamaları kilitli tutar |
-
-Sabit bir worker limiti yoktur. LUNA'nın düşük marjinal maliyeti faydalı delegasyon eşiğini düşürür. Worker sayısını gerçek stage ownership ve validation sınırları belirler. Yalnızca eşzamanlı worker'ların bağımsız olması gerekir; sıralı aşamalar, önkoşulları kabul edildikten sonra fresh worker'lara verilebilir.
-
-## Neden doğrudan LUNA kullanmıyoruz?
-
-Tek, küçük ve bounded bir görevde düz LUNA oturumu hâlâ en basit seçenektir. İstek compound, uzun süreli, kalite hassasiyetli veya tek worker context'ini aşabilecek durumdaysa AgentMaxxing daha faydalı hâle gelir.
-
-| Düz LUNA oturumu | AgentMaxxing |
-| --- | --- |
-| Tek worker bütün hedefi ve execution geçmişini taşır | Main hedefi tutar; worker'lar yalnızca kendi aşamalarının context'ini alır |
-| Geniş bir şartname tek overloaded göreve dönüşebilir | Compound iş dependency-aware ve kabul kapılı aşamalara ayrılır |
-| Implementation yapan worker aynı zamanda temel değerlendiricidir | Main açık acceptance gate uygular; geniş final-quality iddiaları fresh evaluator alabilir |
-| Hata genellikle geniş bir retry üretir | Red, işin sahibi worker'a dar bir correction packet olarak döner |
-| Context tek uzun oturumda büyür | Ağır implementation ayrıntıları compact handoff'ların arkasında izole kalır |
-
-Avantaj, LUNA'nın farklı bir modele dönüşmesi değildir. LUNA daha temiz görevler alır, daha küçük context'lerde çalışır ve eksik işin ilerlemesine izin vermeyen bir integration owner tarafından denetlenir.
-
-## Routing
-
-| İş | Varsayılan rota |
-| --- | --- |
-| Küçük veya sıkı bağlı task | Main doğrudan yapar |
-| Tek ağır ve bounded task | Tek LUNA worker |
-| Compound deliverable | Dependency-aware stage map hazırla |
-| Sıralı aşamalar | Sonraki kabul edilmiş aşamaları fresh worker'lar üstlenebilir |
-| Bağımsız iş akışları | Çakışmayan LUNA worker'ları paralel çalıştır |
-| Geniş final-quality iddiası | Fresh, read-only end-to-end evaluator kullan |
-
-Çakışan dosya sahipliğinden, tekrarlanan repo keşfinden ve somut gerekçe olmadan worker'a bütün konuşmayı vermekten kaçın.
-
-## İş boyutlandırma
-
-İşin boyutunu istenen dosya, klasör, repository veya final artefact sayısından çıkarma. Tek bir çıktı bile birkaç gerçek aşama içerebilir.
-
-Şunlardan birkaçını bir araya getiren işleri compound kabul et:
-
-- subsystem, package, surface, audience veya deliverable türleri;
-- discovery, architecture, implementation, content, migration, polish ve validation;
-- user flow, platform, environment veya operating mode;
-- objective correctness ile subjective quality;
-- birbirinden farklı validation yöntemleri;
-- complete, final, polished veya production-ready olarak tarif edilen greenfield ya da end-to-end sonuç.
-
-Compound işlerde main compact bir stage map hazırlar. Her aşama; tek bounded outcome, dependency, worker ownership, `xhigh` veya `max` effort, write scope, ölçülebilir acceptance, validation ve o packet'ın dışında bırakılan sonraki işleri içerir.
-
-Detaylı requirements, overloaded bir görevi bounded yapmaz. Bir aşamadaki düzeltmeler için aynı worker'ı kullan; sonraki kabul edilmiş aşamanın hedefi, context'i veya validation yüzeyi değişiyorsa normalde fresh worker aç.
-
-## Sorumluluklar
-
-### Main agent
-
-Main agent şunların sahibidir:
-
-- kullanıcı amacı ve kısıtları;
-- mimari kararlar;
-- task decomposition ve worker ownership;
-- workload sizing ve compact stage map;
-- çakışma tespiti;
-- final entegrasyon ve doğrulama;
-- delege edilen aşamalar için açık `ACCEPT` veya `REJECT` kararı;
-- final cevap.
-
-### LUNA worker
-
-Bir LUNA worker tek bir bounded sonucun sahibidir. Şunları yapmalıdır:
-
-1. yalnızca gerekli girdileri incelemek;
-2. işi verilen scope içinde tamamlamak;
-3. ilgili doğrulamaları çalıştırmak;
-4. self-review yapıp bulduğu bütün önemli sorunları düzeltmek;
-5. her kabul kriterini kısa kanıtla eşlemek;
-6. compact handoff ile `ready-for-review` dönmek.
-
-Mümkün olduğunda reasoning profili:
+Skill'i kurmak için Codex'e şu isteği ver:
 
 ```text
-model: gpt-5.6-luna
-reasoning: xhigh | max
+Use $skill-installer to install the skill at:
+https://github.com/HakanBabus/AgentMaxxing/tree/main/.agents/skills/agentmaxxing
 ```
 
-Stabil interface'lere ve doğrudan validation'a sahip bounded işlerde **xhigh** kullan. Birden fazla sistemi etkileyen implementation, architecture-heavy işler, UI/input/render etkileşimi, nondeterministic hata ve pahalı regression riskinde **max** kullan. xhigh aynı önemli gereksinimi tekrar tekrar kaçırırsa görevi yeniden çerçevele veya gerçek sınırlardan böl; yalnızca gerekli correction context'ini fresh bir max worker'a ver.
+`.agents/skills/agentmaxxing/` klasörünü desteklenen bir skills konumuna kopyalayabilir veya repo kapsamındaki sürümü kullanabilirsin. Skill kendi referanslarını içerir; proje hafızası çalıştığın projenin içinde kalır.
 
-Tek bounded aşamada independent review opsiyoneldir. Geniş end-to-end veya final quality iddiası taşıyan compound işlerde fresh bir LUNA evaluator, kabul edilmiş aşamaları write ownership almadan birlikte doğrulamalıdır. Kusurlar etkilenen aşamanın sahibi worker'a geri döner.
+Ardından açıkça çağır:
 
-## Worker packet
-
-Delegasyondan önce belirsizliği kaldır. Kullanışlı bir packet şu şekildedir:
-
-```markdown
-Role: LUNA worker
-
-Reasoning:
-xhigh | max
-
-Stage:
-<stage ID ve bounded outcome>
-
-Depends on:
-<kabul edilmiş prerequisite ID'leri veya none>
-
-Goal:
-<tek ve somut sonuç>
-
-Why delegated:
-<izole kalması gereken ağır context veya iş yükü>
-
-Inputs:
-- <tam dosya, klasör, log, komut, URL veya artefact>
-
-Scope:
-- May inspect: <...>
-- May edit: <...>
-- Must not edit: <...>
-
-Later stages / not this task:
-- <bu packet'ın dışında bırakılan sonraki işler>
-
-Suggested steps:
-1. <ilk faydalı adım>
-2. <doğrulama ve self-review>
-
-Constraints:
-- <davranış, API, dependency, stil veya izin sınırı>
-
-Done when:
-- A1 — <ölçülebilir kabul kriteri>
-- A2 — <ölçülebilir kabul kriteri>
-
-Critical review surfaces:
-- <main'in kontrol edeceği integration boundary, riskli davranış veya artefact>
-
-Validation:
-- <tam komut veya kontrol>
-
-Return only:
-- status
-- changed files
-- 2–5 result bullets
-- her kriter için acceptance evidence
-- validation result
-- self-review result
-- material caveat or decision needed
+```text
+$agentmaxxing Kaydetme/yeniden yükleme hatasını düzelt. Kapsamı koru ve doğrula.
 ```
 
-Edge case'ler için [worker packet rehberine](.agents/skills/agentmaxxing/references/worker-packet.md) ve [routing rehberine](.agents/skills/agentmaxxing/references/routing.md) bakabilirsin.
+Projenin ortasında mısın? Aynı çağrıyı kullan. **Önceden AgentMaxxing notları bulunması gerekmiyor.** Skill önce mevcut dosya ve belgelerden durumu anlar.
 
-## Compact handoff
+Ana oturum, seçtiğin model ve reasoning seviyesini korur. İsteğe bağlı alt ajanlar `gpt-6-astra` ile `low` veya `medium` kullanır. Otomatik skill çağırma kapalı kalır. Yerel keşif ve çağırma davranışı için [resmî skills rehberine](https://learn.chatgpt.com/docs/build-skills) bak.
 
-Worker transcript değil, entegrasyon indeksi döndürmelidir:
+## Çalışma akışı
+
+```mermaid
+flowchart TD
+    A[Kullanıcı görevi] --> B{Faydalı proje notları var mı?}
+    B -->|Evet| C[İlgili notları oku ve güncel bilgileri doğrula]
+    B -->|Eksik veya eski| D[Mevcut proje kanıtlarından durumu anla]
+    D --> C
+    C --> E[Sonuçları ve kontrolleri planla]
+    E --> F{Delegasyon faydalı mı?}
+    F -->|Hayır| G[Ana ajan uygular ve kendini kontrol eder]
+    F -->|Evet| H[Astra low veya medium alt ajan]
+    H --> I[Kendi kontrolü ve kısa kanıt]
+    I --> J{Ana ajan kabul etti mi?}
+    J -->|Düzelt ve yeniden kontrol et| H
+    J -->|Evet| K[Entegre et ve doğrula]
+    G --> K
+    K --> L[Maddeleri kapat ve sonucu bildir]
+    E -. Önemli kararı ortaya çıktığında kaydet .-> M[Kısa proje notları]
+    L --> M
+```
+
+| Adım | Ne yapılır? |
+| --- | --- |
+| **Durumu anla** | Mevcut projeyi ve istenen kapsamı belirle |
+| **Uygula** | Doğrudan çalış veya faydalı bir bağımsız görevi izole et |
+| **Doğrula** | Kendi işini incele, doğrula ve bağımlı işlerden önce kanıtı kabul et |
+| **Hatırla** | Çalışırken kararları kaydet; bitişte maddeleri kapat veya ertele |
+
+Büyük bir görev, aşamalar boyunca tek ajanla ilerleyebilir. Delegasyon ayrı bir karardır. Entegrasyon ve ortak hafıza yazımı boyunca ana ajan sorumludur.
+
+## Projeye ortadan katılma
+
+**Eksik hafıza, projeyi yeniden başlatmayı değil mevcut durumu anlamayı gerektirir.** AgentMaxxing; geçerli talimatları, özet/README'yi, ilgili manifest veya giriş noktalarını, mevcut planları ve devam eden işi inceler. Kaynak incelemesini yalnızca görevin ihtiyaç duyduğu kanıt için genişletir.
+
+| Projede bulunan bilgi | Nasıl ele alınır? |
+| --- | --- |
+| Mevcut yol haritası veya sürüm kontrol listesi | Asıl belge olarak korunur ve bağlantı verilir |
+| Commit edilmemiş değişiklikler | Devam eden iş olarak korunur; tamamlanmışlığı doğrulanmamıştır |
+| Eski TODO veya planlar | Kaynağı tutulur; kontrol edilene kadar durumu doğrulanmamış kalır |
+| Eksik geçmiş veya sürüm hedefi | Bilinmiyor olarak kalır; zaman çizelgesi veya sürüm uydurulmaz |
+| Kısmi veya eski notlar | İlgili eksikler tamamlanır, mevcut durum aşamalı olarak uzlaştırılır |
+| Salt okunur istek | Dosya oluşturulmadan veya değiştirilmeden not önerisi döndürülür |
+
+İlk özet **kısa ve kanıta dayalıdır**. Yol haritası, sürüm ve geçmiş dosyaları yalnızca saklanacak faydalı bilgi varsa oluşur. Git varsa kullanışlıdır; Git olmayan proje de mevcut dosya ve belgelerinden anlaşılabilir. Monorepo'da çalışılan bileşenin kapsamı açık tutulur.
+
+Örneğin kaydetme değişiklikleri tamamlanmamış bir editör, devam eden editör işidir. Daha sonra export ekleme isteği gelecek iş olarak kaydedilir; şimdi export uygulama iznine dönüşmez. Bilinmeyen geçmiş, kapsamı net mevcut bir düzeltmeyi durdurmamalıdır.
+
+[İlk kullanım protokolüne](.agents/skills/agentmaxxing/references/project-memory.md#first-use-in-an-existing-project) bak.
+
+## Alt ajan seçimi
+
+**Küçük görev, zorunlu delegasyon demek değildir.** Net bir görev bağımsız ilerleyebiliyor veya ağır ara bağlamı izole ediyorsa low alt ajan faydalıdır. Gerekli bağlam zaten ana ajandaysa doğrudan uygulama tercih edilir.
+
+| Yol | Uygun olduğu durum | Örnek |
+| --- | --- | --- |
+| **Ana ajan** | Mevcut bağlam veya sıkı bağlı kararlar | Ana ajanın zaten anladığı yerel düzeltme |
+| **Astra low** | Küçük kapsam, stabil girdiler, doğrudan doğrulama | Odaklı arama, belge düzenlemesi veya bilinen hatanın düzeltmesi |
+| **Astra medium** | Daha kapsamlı sınırlı iş veya etkileşen gereksinimler | Dosyalar arası teşhis veya bir migration adımı |
+| **Salt okunur reviewer** | Somut risk veya kanıt eksikliği | Kabul edilmiş aşamalar arasındaki kurtarma davranışını doğrulama |
+
+- Desteklenen başlatma kontrollerinde **`gpt-6-astra`** ve **`low` veya `medium`** seviyesini açıkça seç.
+- Araştırma, reviewer ve düzeltme denemeleri dahil **üst sınır medium**.
+- Low zorlanırsa paketi iyileştir ve gerekçesi varsa medium kullan. Medium zorlanırsa görevi daralt, kanıtı iyileştir veya sıkı bağlı kararı ana ajana geri getir.
+- Alt ajan sayısını gerçek bağımsızlık ve istemci sınırları belirler. Eşzamanlı yazarların kapsamı çakışmamalıdır; ortak hafızaya ana ajan yazar.
+- Profil mevcut değilse ana ajan mümkün olduğunda doğrudan devam eder ve sınırlamayı belirtir. Başka bir alt ajan modeli sessizce seçilmez.
+
+Astra bu seviyeleri [resmî model belgesinde](https://developers.openai.com/api/docs/models/gpt-6-astra) destekler. Yönlendirme politikası bu projenin tercihidir. Amaç gereksiz bağlamı ve koordinasyonu azaltmaktır; genel bir maliyet veya kalite üstünlüğü vaat edilmez.
+
+## Küçük hafıza, korunan bilgi
+
+**Notu kısa tut; anlamı koru.** Bu dosyaları oluşturmadan önce mevcut proje belgelerini kullan:
+
+```text
+.agentmaxxing/
+├── project.md   Mevcut yön, kısıtlar ve kaynak bağlantıları
+├── roadmap.md   Gelecek hâl, fikirler, kabul edilen işler ve ertelemeler
+├── release.md   Sürüm kontrolleri, uyumluluk koşulları ve kanıt
+└── history.md   Önemli dönüm noktaları ve karar gerekçeleri
+```
+
+Yalnızca faydalı dosyaları oluştur. Özet bir indekstir; tüm mimarinin kopyası değildir. Her görevde geçmişin tamamını yüklemek yerine ilgili bölümleri gerektiğinde oku.
+
+Kısa bir kayıt, önemli bilgiyi tek maddede taşıyabilir:
+
+```text
+R-07 [deferred] Çevrimdışı export | storage v2 doğrulamasından sonra
+Kaynak: 2026-10-02, kullanıcı isteği | Kontrol: export verisi yeniden yüklemede korunur
+```
+
+| Korunacak bilgi | Nasıl kısa tutulur? |
+| --- | --- |
+| Sonuç, durum ve kimin istediği | Tek kaynaklı kayıt; tekrarlanan paragraflar yok |
+| Kısıtlar, bağımlılıklar ve anlamlı gerekçe | Kısa koşullar ve tam ayrıntıya bağlantı |
+| Açık sorular ve sürüm yükümlülükleri | Açıkça çözülmemiş maddeler ve kanıtlı kontrol kutuları |
+| Önemli eski ayrıntılar | Gerektiğinde bağlantılı arşiv ve kullanışlı indeks |
+
+**Aynı turda kaydet:** "sonra," "release'ten önce" ve "şu olana kadar ertele" istekleri, ajan çalışırken kalıcı nota dönüşmelidir. Öneriler `idea` olarak kalır; kabul edilmiş veya ertelenmiş işlerin koşulları korunur. Keyfî uzunluk sınırına uymak için özgün bilgiyi silme.
+
+**Kanıttan devam et:** değişebilir bilgileri doğrula, geçersizleşen notları güncelle ve kullanıcı amacını koru. Eksik veya eski not, tahmin yürütme ya da durma gerekçesi değil, aşamalı onarım gerektirir.
+
+**Sürümden önce kontrol et:** hazır olma iddiası gerçek doğrulama ister. Başarısız veya yapılamayan kontroller görünür kalır. Hafıza kaydı aktif çalışma sırasında gerçekleşir; arka plan servisi veya ani kesinti sonrası garantili kayıt yoktur.
+
+[Hafıza protokolüne](.agents/skills/agentmaxxing/references/project-memory.md) ve [bu reponun kısa notlarına](.agentmaxxing/project.md) bak.
+
+## Kanıt ve düzeltmeler
+
+Alt ajan küçük bir paket alır: **model/seviye, sonuç, delegasyon gerekçesi, tam girdiler, yazma kapsamı, bağımlılıklar, kabul ve doğrulama**. `ready-for-review` dönmeden önce test eder ve kendi işini gözden geçirir.
+
+Ana ajan **ACCEPT** veya **REJECT** kararı için gerekeni inceler. Bağımlı iş kabulü bekler. Düzeltme alt ajanda kalabilir veya açık yazma sahipliği devriyle ana ajana geçebilir; iki yol da yeniden kontrol gerektirir.
+
+<details>
+<summary><strong>Kısa sonuç devri biçimi</strong></summary>
 
 ```text
 STATUS: ready-for-review | needs-input | failed
-
-CHANGED:
-- <paths or none>
-
-RESULT:
-- <2–5 kısa madde>
-
-ACCEPTANCE:
-- A1 PASS/FAIL — <kısa kanıt>
-- A2 PASS/FAIL — <kısa kanıt>
-
-VALIDATION:
-- PASS/FAIL/SKIPPED — <tam komut veya kontrol>
-
-SELF-REVIEW:
-- <düzeltilen önemli sorun veya none>
-
-CAVEAT / DECISION NEEDED:
-- <yalnızca önemliyse>
+CHANGED: <dosyalar veya none>
+RESULT: <kısa sonuç>
+ACCEPTANCE: <kriter ID'leri, PASS/FAIL, kanıt>
+VALIDATION: <PASS/FAIL/SKIPPED, tam kontrol>
+SELF-REVIEW: <önemli düzeltme veya none>
+MEMORY NOTES: <ana ajan için kalıcı notlar veya none>
+CAVEAT: <yalnızca önemliyse>
 ```
 
-Main agent yalnızca entegrasyon için gereken diff veya artefact'ları açar.
+Kanıt ve ilgili çıktılara yönlendirme döndür; ham logları ve tam konuşma dökümlerini ana bağlamın dışında tut. [Low/medium görev paketi örneklerine](.agents/skills/agentmaxxing/references/worker-packet.md) bak.
 
-## Kabul ve düzeltme
+</details>
 
-Main agent karar vermek için changed path listesini, acceptance evidence'ı, zorunlu validation'ı, önceden belirtilen kritik yüzeyleri ve yalnızca entegrasyon açısından hassas diff veya artefact'ları kontrol eder.
-
-- Bütün zorunlu kriterlerin güvenilir kanıtı varsa ve önemli sorun es geçilmiyorsa **ACCEPT**.
-- Kanıt eksikse, validation yetersizse, scope dışına çıkılmışsa veya önemli kusur kalmışsa **REJECT**.
-
-Red durumunda main agent; başarısız acceptance ID'lerini, gözlenen kanıtı, korunacak çalışan davranışı, correction scope'u ve tam recheck'i aynı LUNA worker'a gönderir. LUNA bir delta handoff döndürür ve main agent yeniden karar verir. Kabul edilene veya gerçek bir authorization, kullanıcı kararı ya da external-state engeline ulaşılana kadar döngü sürer. Main agent kriteri es geçmez, reddedilen delegated implementation'ı sessizce kendisi düzeltmez ve bağımlı aşamayı açmaz.
-
-## Kurulum
-
-Repo-scoped skill şu konumdadır:
+## Skill yapısı
 
 ```text
 .agents/skills/agentmaxxing/
+├── SKILL.md
+├── agents/openai.yaml
+└── references/
+    ├── routing.md
+    ├── worker-packet.md
+    └── project-memory.md
 ```
 
-Codex skill installer ile kur veya bu klasörü desteklenen bir skills konumuna kopyala. Açıkça çağır:
+| Belge | Ne için okunur? |
+| --- | --- |
+| [Skill](.agents/skills/agentmaxxing/SKILL.md) | Uygulama talimatları |
+| [Yönlendirme](.agents/skills/agentmaxxing/references/routing.md) | Reasoning, eşzamanlılık, reviewer ve düzeltmeler |
+| [Görev paketleri](.agents/skills/agentmaxxing/references/worker-packet.md) | Sınırlı görev örnekleri |
+| [Proje hafızası](.agents/skills/agentmaxxing/references/project-memory.md) | İlk kullanım, kısa kayıt, devam ve sürüm |
+| [Mimari](docs/ARCHITECTURE.md) | Roller, yaşam döngüsü ve hata yönetimi |
+| [Değişiklik günlüğü](CHANGELOG.md) · [Katkı rehberi](CONTRIBUTING.md) | Değişiklikler ve katkı kapsamı |
 
-```text
-$agentmaxxing <repo görevin>
-```
+## Kapsam ve lisans
 
-Implicit invocation kapalıdır; böylece küçük normal işler workflow'u istemeden değiştirmez.
+AgentMaxxing birkaç yerel Markdown notuyla çalışan bir talimat katmanı olarak kalır. Veritabanı, daemon, dashboard, telemetri, token defteri veya alt ajan kaydı eklemez. Ana oturum ayarlarını ve kullanıcının yetki sınırlarını korur. VisionOffload bu revizyonun dışındadır.
 
-## Repo yapısı
-
-```text
-AgentMaxxing/
-├── .agents/skills/agentmaxxing/
-│   ├── SKILL.md
-│   ├── agents/openai.yaml
-│   └── references/
-│       ├── routing.md
-│       └── worker-packet.md
-├── docs/ARCHITECTURE.md
-├── AGENTS.md
-├── CHANGELOG.md
-├── README.md
-└── README_TR.md
-```
-
-AgentMaxxing bir runtime değil, instruction layer'dır. Daemon, database, telemetry servisi, token ledger veya persistent task registry içermez.
-
-## VisionOffload
-
-VisionOffload şimdilik bilerek dahil edilmedi. Ayrı geliştirilecek ve daha sonra aynı context-isolation prensiplerini kullanabilecek.
-
-## Lisans
-
-Apache License 2.0. AgentMaxxing bağımsız bir açık kaynak projesidir; OpenAI ile bağlantılı veya OpenAI tarafından onaylanmış değildir.
+[Apache License 2.0](LICENSE). Bağımsız açık kaynak projesi; OpenAI ile bağlantılı veya OpenAI tarafından onaylanmış değildir.

@@ -1,7 +1,7 @@
 interface:
   display_name: "AgentMaxxing"
-  short_description: "Keep main context lean with scoped LUNA workers"
-  default_prompt: "Use $agentmaxxing to keep the main context small and delegate only well-scoped heavy work to LUNA workers."
+  short_description: "Single-agent work, Astra workers, and project memory"
+  default_prompt: "Use $agentmaxxing to orient from current evidence, work directly by default, use Astra low or medium workers when useful, and preserve compact project notes without losing decisions."
   brand_color: "#7C3AED"
 
 policy:

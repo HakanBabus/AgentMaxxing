@@ -2,263 +2,203 @@
 
 # ⚡ AgentMaxxing
 
-### Keep the main agent sharp. Push heavy work outward.
+**Focused execution. Useful delegation. Project intent that lasts.**
 
-**Context-efficient delegation for Codex-style coding workflows.**
+A lightweight Codex skill for **single-agent work**, optional **Astra low/medium workers**, and **compact project memory**.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-![Status](https://img.shields.io/badge/status-experimental-orange)
-![Workers](https://img.shields.io/badge/workers-LUNA-7c3aed)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![Default](https://img.shields.io/badge/default-single%20agent-2563eb)
+![Workers](https://img.shields.io/badge/workers-Astra%20low%20%2F%20medium-7c3aed)
+![Memory](https://img.shields.io/badge/memory-Markdown-059669)
 
 [English](README.md) · [Türkçe](README_TR.md)
+
+[Start here](#start-here) · [Workflow](#the-workflow) · [First use](#joining-a-project-midway) · [Workers](#choosing-workers) · [Memory](#small-memory-full-intent)
 
 </div>
 
 ---
 
-AgentMaxxing is a lightweight orchestration skill built around one rule:
+> **Keep the work focused and the decisions durable.** Use one agent by default, delegate a bounded task when it adds value, and record future work before it disappears into chat history.
 
-> **The main agent keeps the goal, decisions, acceptance, and integration context. Heavy bounded work goes to LUNA workers.**
+| Execution | Workers | Continuity |
+| --- | --- | --- |
+| **One integration owner** | **Astra low or medium** | **Small, sourced Markdown notes** |
+| Plan stages without automatically spawning agents | Match effort to task scope; medium is the ceiling | Keep intent, conditions, and evidence across sessions |
 
-The main agent first sizes the work. Tiny work stays direct, one bounded outcome can go to one LUNA, and compound deliverables become dependency-aware accepted stages. Workers receive small, explicit packets and return compact, verifiable results.
+## Start here
 
-## Why AgentMaxxing
-
-AgentMaxxing is a token-conscious orchestration pattern built around **LUNA subagents**. It is designed to save expensive main-agent context and usage budget: the main agent keeps intent, decomposition, decisions, and acceptance, while LUNA `xhigh` or `max` workers carry bounded implementation, investigation, validation, and correction context.
-
-The goal is to reduce growth of the expensive main-agent context and spend more of the workload on a high-volume worker model. This is especially attractive to **ChatGPT Plus** users who want their included Codex allowance to cover more focused work. OpenAI's [official Codex pricing documentation](https://learn.chatgpt.com/docs/pricing) lists Codex and the GPT-5.6 family, including Luna, with Plus and describes Luna as the higher-usage option for lighter-weight or high-volume workloads.
-
-AgentMaxxing does not promise fewer total tokens for every task. Delegation, validation, and correction have overhead. It optimizes where context accumulates and which model performs the bulk of bounded work.
-
-| Layer | Responsibility |
-| --- | --- |
-| **Main agent** | Size the request, build the stage map, write precise packets, and decide `ACCEPT` or `REJECT` |
-| **LUNA fleet** | Execute bounded stages with `xhigh` or `max`, self-review, validate, and correct rejected work |
-| **Evidence handoff** | Return acceptance evidence and compact results instead of raw logs or full worker context |
-| **Acceptance gate** | Keep dependent stages locked until their prerequisites are explicitly accepted |
-
-There is no fixed worker limit. LUNA's low marginal cost lowers the threshold for useful delegation. Worker count follows real stage ownership and validation boundaries. Only concurrent workers must be independent; sequential stages may use fresh workers after their prerequisites are accepted.
-
-## Why not just use LUNA directly?
-
-A plain LUNA session is still the simplest choice for one small, bounded task. AgentMaxxing becomes more useful when the request is compound, long-running, quality-sensitive, or likely to overload one worker context.
-
-| Plain LUNA session | AgentMaxxing |
-| --- | --- |
-| One worker carries the full goal and execution history | Main keeps the goal while workers receive only stage-specific context |
-| A broad specification can become one overloaded task | Compound work is split into dependency-aware accepted stages |
-| The implementing worker is also the primary judge | Main applies an explicit acceptance gate; broad final-quality claims can receive fresh evaluation |
-| A failure often causes a broad retry | Rejection returns a narrow correction packet to the owning worker |
-| Context grows inside one long session | Heavy implementation details remain isolated behind compact handoffs |
-
-The advantage is not that LUNA becomes a different model. It is that LUNA receives cleaner assignments, works inside smaller contexts, and is supervised by an integration owner that will not advance incomplete work.
-
-## Routing
-
-| Work | Default route |
-| --- | --- |
-| Tiny or tightly coupled task | Main handles it directly |
-| One heavy, bounded task | One LUNA worker |
-| Compound deliverable | Build a dependency-aware stage map |
-| Sequential stages | Fresh workers may own later accepted stages |
-| Independent workstreams | Run non-overlapping LUNA workers in parallel |
-| Broad final-quality claim | Fresh read-only end-to-end evaluator |
-
-Avoid overlapping write ownership, repeated repository discovery, and workers that receive the full conversation without a concrete need.
-
-## Workload sizing
-
-Do not estimate work from the number of requested files, folders, repositories, or final artifacts. One output can still contain several real stages.
-
-Treat work as compound when it mixes several of these:
-
-- subsystems, packages, surfaces, audiences, or deliverable types;
-- discovery, architecture, implementation, content, migration, polish, and validation;
-- user flows, platforms, environments, or operating modes;
-- objective correctness and subjective quality;
-- materially different validation methods;
-- a greenfield or end-to-end result described as complete, final, polished, or production-ready.
-
-For compound work, main creates a compact stage map. Every stage gets one bounded outcome, dependencies, worker ownership, `xhigh` or `max` effort, write scope, measurable acceptance, validation, and an explicit list of later work excluded from that packet.
-
-Detailed requirements do not make an overloaded task bounded. Use the same worker for corrections inside a stage; normally use a fresh worker when the next accepted stage has a different goal, context, or validation surface.
-
-## Responsibilities
-
-### Main agent
-
-The main agent owns:
-
-- user intent and constraints;
-- architectural decisions;
-- task decomposition and worker ownership;
-- workload sizing and the compact stage map;
-- conflict detection;
-- final integration and validation;
-- explicit `ACCEPT` or `REJECT` decisions for delegated stages;
-- the final answer.
-
-### LUNA worker
-
-A LUNA worker owns one bounded outcome. It should:
-
-1. inspect only the required inputs;
-2. complete the task within its scope;
-3. run relevant validation;
-4. self-review and correct every material issue it finds;
-5. map concise evidence to each acceptance criterion;
-6. return `ready-for-review` with a compact handoff.
-
-Reasoning profile when available:
+Install the skill by asking Codex:
 
 ```text
-model: gpt-5.6-luna
-reasoning: xhigh | max
+Use $skill-installer to install the skill at:
+https://github.com/HakanBabus/AgentMaxxing/tree/main/.agents/skills/agentmaxxing
 ```
 
-Use **xhigh** for bounded work with stable interfaces and direct validation. Use **max** for cross-system implementation, architecture-heavy work, UI/input/render interactions, nondeterministic failures, and expensive regressions. If xhigh repeatedly misses the same material requirement, reframe or split the task and send the smallest sufficient correction context to a fresh max worker.
+You can also copy `.agents/skills/agentmaxxing/` into a supported skills location, or use the repo-scoped copy. The skill includes its references; project memory stays inside the project you are working on.
 
-For one bounded stage, independent review is optional. For compound work claiming broad end-to-end or final quality, a fresh LUNA evaluator should normally validate the accepted stages together without taking write ownership. Defects return to the worker that owns the affected stage.
+Then invoke it explicitly:
 
-## Worker packet
-
-Before delegating, remove ambiguity. A useful packet looks like this:
-
-```markdown
-Role: LUNA worker
-
-Reasoning:
-xhigh | max
-
-Stage:
-<stage ID and bounded outcome>
-
-Depends on:
-<accepted prerequisite IDs or none>
-
-Goal:
-<one concrete outcome>
-
-Why delegated:
-<heavy context or workload that should stay isolated>
-
-Inputs:
-- <exact files, directories, logs, commands, URLs, or artifacts>
-
-Scope:
-- May inspect: <...>
-- May edit: <...>
-- Must not edit: <...>
-
-Later stages / not this task:
-- <work deliberately excluded from this packet>
-
-Suggested steps:
-1. <first useful step>
-2. <validation and self-review>
-
-Constraints:
-- <behavior, API, dependency, style, or permission boundary>
-
-Done when:
-- A1 — <measurable acceptance criterion>
-- A2 — <measurable acceptance criterion>
-
-Critical review surfaces:
-- <integration boundary, risky behavior, or artifact the main should inspect>
-
-Validation:
-- <exact command or check>
-
-Return only:
-- status
-- changed files
-- 2–5 result bullets
-- acceptance evidence for every criterion
-- validation result
-- self-review result
-- material caveat or decision needed
+```text
+$agentmaxxing Fix the save/reload bug. Keep the change scoped and verify it.
 ```
 
-See [worker packet guidance](.agents/skills/agentmaxxing/references/worker-packet.md) and [routing guidance](.agents/skills/agentmaxxing/references/routing.md) for edge cases.
+Already halfway through a project? Use the same invocation. **No existing AgentMaxxing notes are required.** The skill first orients from your current files and documents.
 
-## Compact handoff
+The main session keeps the model and reasoning effort you selected. Optional workers use `gpt-6-astra` with `low` or `medium`. Automatic skill invocation remains disabled. See the [official skills guide](https://learn.chatgpt.com/docs/build-skills) for local discovery and invocation behavior.
 
-Workers should return an integration index, not a transcript:
+## The workflow
+
+```mermaid
+flowchart TD
+    A[User task] --> B{Useful project notes available?}
+    B -->|Yes| C[Read relevant notes and verify current facts]
+    B -->|Missing or stale| D[Orient from existing project evidence]
+    D --> C
+    C --> E[Plan outcomes and checks]
+    E --> F{Would delegation help?}
+    F -->|No| G[Main executes and self-checks]
+    F -->|Yes| H[Astra low or medium worker]
+    H --> I[Self-check and concise evidence]
+    I --> J{Main accepts?}
+    J -->|Correct and recheck| H
+    J -->|Yes| K[Integrate and verify]
+    G --> K
+    K --> L[Close items and report]
+    E -. Record important intent as it appears .-> M[Compact project notes]
+    L --> M
+```
+
+| Step | What changes |
+| --- | --- |
+| **Orient** | Understand the existing project and the requested scope |
+| **Execute** | Work directly, or isolate a useful independent task |
+| **Verify** | Self-review, validate, and accept evidence before dependent work |
+| **Remember** | Capture decisions during work; close or defer items at completion |
+
+A large task can stay with one agent across several milestones. Delegation is a separate decision. Main owns integration and shared memory writes throughout.
+
+## Joining a project midway
+
+**Missing memory triggers orientation, not a project restart.** AgentMaxxing reads applicable instructions, the overview/README, relevant manifests or entrypoints, existing plans, and current work status. It expands into source only when the task needs more evidence.
+
+| Found in the project | How it is treated |
+| --- | --- |
+| Existing roadmap or release checklist | Keep it authoritative and link it |
+| Uncommitted changes | Preserve them as work in progress; completion is unverified |
+| Old TODOs or plans | Retain their source and mark status unverified until checked |
+| Missing history or release target | Leave it unknown; do not invent a timeline or version |
+| Partial or stale notes | Fill relevant gaps and reconcile current facts incrementally |
+| Read-only request | Return proposed notes without creating or changing files |
+
+The first overview is **short and evidence-based**. Roadmap, release, and history files appear only when there is useful information to store. Git is useful when present, but a non-Git project can use its existing files and documents. In a monorepo, the component scope stays explicit.
+
+For example, an existing editor with unfinished save changes is still an in-progress editor. A request to add export later becomes a future note; it does not authorize implementing export now. Unknown background should not block a well-scoped current fix.
+
+Read the [first-use protocol](.agents/skills/agentmaxxing/references/project-memory.md#first-use-in-an-existing-project).
+
+## Choosing workers
+
+**Small does not mean mandatory delegation.** A low worker is useful when a clear task can progress independently or isolate noisy context. Direct execution stays preferable when the main agent already has the needed context.
+
+| Route | Good fit | Example |
+| --- | --- | --- |
+| **Main** | Existing context or tightly coupled decisions | A local fix already understood by main |
+| **Astra low** | Small scope, stable inputs, direct validation | A focused search, docs edit, or known-reproduction fix |
+| **Astra medium** | Broader bounded work or interacting requirements | Cross-file diagnosis or one migration step |
+| **Read-only reviewer** | Concrete risk or an evidence gap | Verify recovery behavior across accepted stages |
+
+- Set **`gpt-6-astra`** and **`low` or `medium`** explicitly in supported spawn controls.
+- **Medium is the ceiling**, including research, reviewers, and correction attempts.
+- When low struggles, improve the packet and use medium if justified. When medium struggles, narrow the task, improve evidence, or return the coupled decision to main.
+- Worker count follows genuine independence and client limits. Concurrent writers need non-overlapping scope; main writes shared memory.
+- If the profile is unavailable, main can continue directly when feasible and disclose the limitation. Do not silently choose another worker model.
+
+Astra supports these effort levels in its [official model documentation](https://developers.openai.com/api/docs/models/gpt-6-astra). The routing policy is this project's choice. The goal is less wasted context and coordination; no universal cost or quality saving is promised.
+
+## Small memory, full intent
+
+**Keep the note short; keep the meaning intact.** Reuse existing project documents before creating these files:
+
+```text
+.agentmaxxing/
+├── project.md   Current direction, constraints, and source links
+├── roadmap.md   Future shape, ideas, accepted work, and deferrals
+├── release.md   Release checks, compatibility conditions, and evidence
+└── history.md   Meaningful milestones and decision rationale
+```
+
+Create only useful files. The overview is an index, not a duplicate of the entire architecture. Read relevant sections on demand rather than loading the full history on every task.
+
+A compact record can carry the important information in one entry:
+
+```text
+R-07 [deferred] Offline export | after storage v2 validation
+Source: 2026-10-02, user request | Check: exported data survives reload
+```
+
+| Preserve | Keep compact by |
+| --- | --- |
+| Outcome, status, and who requested it | One sourced entry instead of repeated paragraphs |
+| Constraints, dependencies, and meaningful rationale | Short conditions plus links to exact details |
+| Open questions and release obligations | Explicit unresolved items and evidence-based checkboxes |
+| Important older detail | Linked archives when needed, with a useful index |
+
+**Capture in the same turn:** "later," "before release," and "defer until" requests should become durable notes while the agent is working. Suggestions remain `idea`; accepted or deferred work keeps its conditions. Do not drop unique information to satisfy an arbitrary length target.
+
+**Resume from evidence:** verify mutable facts, update superseded notes, and preserve user intent. A missing or stale note is repaired incrementally rather than treated as a reason to guess or stop.
+
+**Check before release:** readiness requires actual validation. Failed or unavailable checks stay visible. Memory capture runs during active work; there is no background service or guaranteed capture after an abrupt interruption.
+
+See the [memory protocol](.agents/skills/agentmaxxing/references/project-memory.md) and [this repository's compact notes](.agentmaxxing/project.md).
+
+## Evidence and corrections
+
+Workers receive a small packet: **model/effort, outcome, reason for delegation, exact inputs, write scope, dependencies, acceptance, and validation**. They test and self-review before returning `ready-for-review`.
+
+Main reviews only what it needs to decide **ACCEPT** or **REJECT**. Dependent work waits for acceptance. A correction can stay with the worker or move to main after an explicit transfer of write ownership; both routes require rechecking.
+
+<details>
+<summary><strong>Compact handoff format</strong></summary>
 
 ```text
 STATUS: ready-for-review | needs-input | failed
-
-CHANGED:
-- <paths or none>
-
-RESULT:
-- <2–5 concise bullets>
-
-ACCEPTANCE:
-- A1 PASS/FAIL — <concise evidence>
-- A2 PASS/FAIL — <concise evidence>
-
-VALIDATION:
-- PASS/FAIL/SKIPPED — <exact command or check>
-
-SELF-REVIEW:
-- <material issue corrected, or none>
-
-CAVEAT / DECISION NEEDED:
-- <only if material>
+CHANGED: <paths or none>
+RESULT: <concise outcome>
+ACCEPTANCE: <criterion IDs, PASS/FAIL, evidence>
+VALIDATION: <PASS/FAIL/SKIPPED, exact check>
+SELF-REVIEW: <material correction or none>
+MEMORY NOTES: <durable notes for main, or none>
+CAVEAT: <only if material>
 ```
 
-The main agent opens only the diffs or artifacts needed for integration.
+Return evidence and navigation pointers, keeping raw logs and full transcripts outside the main context. See [low/medium packet examples](.agents/skills/agentmaxxing/references/worker-packet.md).
 
-## Acceptance and correction
+</details>
 
-The main agent checks changed paths, acceptance evidence, required validation, declared critical surfaces, and only the integration-sensitive diff or artifacts needed for a decision.
-
-- **ACCEPT** when every required criterion has credible evidence and no material issue is ignored.
-- **REJECT** when evidence is missing, validation is insufficient, scope drift exists, or a material defect remains.
-
-On rejection, the main agent sends the same LUNA worker the failed acceptance IDs, observed evidence, behavior to preserve, correction scope, and exact recheck. LUNA returns a delta handoff and the main agent decides again. The loop continues until acceptance or a real authorization, user-decision, or external-state blocker. The main agent does not waive the criterion, silently repair the rejected delegated implementation, or unlock a dependent stage.
-
-## Installation
-
-The repo-scoped skill lives at:
+## Skill layout
 
 ```text
 .agents/skills/agentmaxxing/
+├── SKILL.md
+├── agents/openai.yaml
+└── references/
+    ├── routing.md
+    ├── worker-packet.md
+    └── project-memory.md
 ```
 
-Install it with the Codex skill installer or copy that directory into a supported skills location. Invoke it explicitly:
+| Document | Read it for |
+| --- | --- |
+| [Skill](.agents/skills/agentmaxxing/SKILL.md) | Operational instructions |
+| [Routing](.agents/skills/agentmaxxing/references/routing.md) | Effort, concurrency, reviewers, and corrections |
+| [Worker packets](.agents/skills/agentmaxxing/references/worker-packet.md) | Bounded task examples |
+| [Project memory](.agents/skills/agentmaxxing/references/project-memory.md) | First use, compact capture, resume, and release |
+| [Architecture](docs/ARCHITECTURE.md) | Roles, lifecycle, and failure handling |
+| [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) | Changes and contribution scope |
 
-```text
-$agentmaxxing <your repository task>
-```
+## Scope and license
 
-Implicit invocation is disabled so ordinary small tasks do not change workflow unexpectedly.
+AgentMaxxing stays an instruction layer with a few project-local Markdown notes. It adds no database, daemon, dashboard, telemetry, token ledger, or worker registry. It keeps the main session's settings and the user's authorization boundaries. VisionOffload remains outside this revision.
 
-## Repository
-
-```text
-AgentMaxxing/
-├── .agents/skills/agentmaxxing/
-│   ├── SKILL.md
-│   ├── agents/openai.yaml
-│   └── references/
-│       ├── routing.md
-│       └── worker-packet.md
-├── docs/ARCHITECTURE.md
-├── AGENTS.md
-├── CHANGELOG.md
-├── README.md
-└── README_TR.md
-```
-
-AgentMaxxing is an instruction layer, not a runtime. It has no daemon, database, telemetry service, token ledger, or persistent task registry.
-
-## VisionOffload
-
-VisionOffload is intentionally not included yet. It will be developed separately and can later reuse the same context-isolation principles.
-
-## License
-
-Apache License 2.0. AgentMaxxing is an independent open-source project and is not affiliated with or endorsed by OpenAI.
+[Apache License 2.0](LICENSE). Independent open-source project; not affiliated with or endorsed by OpenAI.
