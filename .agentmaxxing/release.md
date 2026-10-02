@@ -21,5 +21,5 @@ Profile availability is client-dependent; see the [skill](../.agents/skills/agen
 
 Local delivery: installed skill updated, all five file hashes match the validated
 repository source, and the previous installation is backed up outside skills.
-Publication is pending: CLI credentials are invalid and the connected GitHub
-integration rejected the write with HTTP 403. Renew authentication before push.
+Repository delivery: GitHub CLI authentication was renewed and the revision was
+pushed to origin/main. This publishes repository changes, not a tagged release.
