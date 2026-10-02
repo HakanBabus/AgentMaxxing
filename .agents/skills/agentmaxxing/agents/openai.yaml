@@ -1,7 +1,7 @@
 interface:
   display_name: "AgentMaxxing"
-  short_description: "Single-agent work, Astra workers, and project memory"
-  default_prompt: "Use $agentmaxxing to orient from current evidence, work directly by default, use Astra low or medium workers when useful, and preserve compact project notes without losing decisions."
+  short_description: "Single-agent work, Sol 6.1 workers, and project memory"
+  default_prompt: "Use $agentmaxxing to orient from current evidence, work directly by default, use GPT-6.1 Sol low or medium workers when useful, and preserve compact project notes without losing decisions."
   brand_color: "#7C3AED"
 
 policy:

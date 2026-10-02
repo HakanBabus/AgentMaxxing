@@ -7,7 +7,7 @@ This repository defines a lightweight coding-workflow skill. Keep it small.
 - Single-agent execution is the default; planning stages does not require delegation.
 - Main context cleanliness and continuity of project intent are the primary goals.
 - Main keeps the user's selected session model and effort.
-- All delegated workers use `gpt-6-astra`: `low` for small, clear tasks and `medium` for broader work. Medium is the ceiling, including retries and reviewers.
+- All delegated workers use `gpt-6.1-sol`: `low` for small, clear tasks and `medium` for broader work. Medium is the ceiling, including retries and reviewers.
 - Delegation must justify its isolation, independent progress, or review value. Worker count is dynamic within client limits, without an artificial project cap.
 - Workers receive explicit, compact packets with non-overlapping active write scopes.
 - Implementing agents validate and self-review; independent review is optional and justified by risk or an evidence gap.

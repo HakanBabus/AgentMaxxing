@@ -4,11 +4,11 @@
 
 **Focused execution. Useful delegation. Project intent that lasts.**
 
-A lightweight Codex skill for **single-agent work**, optional **Astra low/medium workers**, and **compact project memory**.
+A lightweight Codex skill for **single-agent work**, optional **GPT-6.1 Sol low/medium workers**, and **compact project memory**.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![Default](https://img.shields.io/badge/default-single%20agent-2563eb)
-![Workers](https://img.shields.io/badge/workers-Astra%20low%20%2F%20medium-7c3aed)
+![Workers](https://img.shields.io/badge/workers-GPT--6.1%20Sol%20low%20%2F%20medium-7c3aed)
 ![Memory](https://img.shields.io/badge/memory-Markdown-059669)
 
 [English](README.md) · [Türkçe](README_TR.md)
@@ -23,7 +23,7 @@ A lightweight Codex skill for **single-agent work**, optional **Astra low/medium
 
 | Execution | Workers | Continuity |
 | --- | --- | --- |
-| **One integration owner** | **Astra low or medium** | **Small, sourced Markdown notes** |
+| **One integration owner** | **GPT-6.1 Sol low or medium** | **Small, sourced Markdown notes** |
 | Plan stages without automatically spawning agents | Match effort to task scope; medium is the ceiling | Keep intent, conditions, and evidence across sessions |
 
 ## Start here
@@ -45,7 +45,7 @@ $agentmaxxing Fix the save/reload bug. Keep the change scoped and verify it.
 
 Already halfway through a project? Use the same invocation. **No existing AgentMaxxing notes are required.** The skill first orients from your current files and documents.
 
-The main session keeps the model and reasoning effort you selected. Optional workers use `gpt-6-astra` with `low` or `medium`. Automatic skill invocation remains disabled. See the [official skills guide](https://learn.chatgpt.com/docs/build-skills) for local discovery and invocation behavior.
+The main session keeps the model and reasoning effort you selected. Optional workers use `gpt-6.1-sol` with `low` or `medium`. Automatic skill invocation remains disabled. See the [official skills guide](https://learn.chatgpt.com/docs/build-skills) for local discovery and invocation behavior.
 
 ## The workflow
 
@@ -58,7 +58,7 @@ flowchart TD
     C --> E[Plan outcomes and checks]
     E --> F{Would delegation help?}
     F -->|No| G[Main executes and self-checks]
-    F -->|Yes| H[Astra low or medium worker]
+    F -->|Yes| H[GPT-6.1 Sol low or medium worker]
     H --> I[Self-check and concise evidence]
     I --> J{Main accepts?}
     J -->|Correct and recheck| H
@@ -104,17 +104,17 @@ Read the [first-use protocol](.agents/skills/agentmaxxing/references/project-mem
 | Route | Good fit | Example |
 | --- | --- | --- |
 | **Main** | Existing context or tightly coupled decisions | A local fix already understood by main |
-| **Astra low** | Small scope, stable inputs, direct validation | A focused search, docs edit, or known-reproduction fix |
-| **Astra medium** | Broader bounded work or interacting requirements | Cross-file diagnosis or one migration step |
+| **GPT-6.1 Sol low** | Small scope, stable inputs, direct validation | A focused search, docs edit, or known-reproduction fix |
+| **GPT-6.1 Sol medium** | Broader bounded work or interacting requirements | Cross-file diagnosis or one migration step |
 | **Read-only reviewer** | Concrete risk or an evidence gap | Verify recovery behavior across accepted stages |
 
-- Set **`gpt-6-astra`** and **`low` or `medium`** explicitly in supported spawn controls.
+- Set **`gpt-6.1-sol`** and **`low` or `medium`** explicitly in supported spawn controls.
 - **Medium is the ceiling**, including research, reviewers, and correction attempts.
 - When low struggles, improve the packet and use medium if justified. When medium struggles, narrow the task, improve evidence, or return the coupled decision to main.
 - Worker count follows genuine independence and client limits. Concurrent writers need non-overlapping scope; main writes shared memory.
 - If the profile is unavailable, main can continue directly when feasible and disclose the limitation. Do not silently choose another worker model.
 
-Astra supports these effort levels in its [official model documentation](https://developers.openai.com/api/docs/models/gpt-6-astra). The routing policy is this project's choice. The goal is less wasted context and coordination; no universal cost or quality saving is promised.
+GPT-6.1 Sol supports these effort levels in its [official model documentation](https://developers.openai.com/api/docs/models/gpt-6.1-sol). The routing policy is this project's choice. The goal is less wasted context and coordination; no universal cost or quality saving is promised.
 
 ## Small memory, full intent
 

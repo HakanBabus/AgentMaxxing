@@ -17,10 +17,10 @@ flowchart TD
     R --> C[Plan outcomes and validation]
     C --> D{Does delegation add value?}
     D -->|No| E[Main executes and self-checks]
-    D -->|Yes| F[Bounded Astra packet]
+    D -->|Yes| F[Bounded GPT-6.1 Sol packet]
     F --> G{Task scope}
-    G -->|Small and clear| H[Astra low]
-    G -->|Broader reasoning| I[Astra medium]
+    G -->|Small and clear| H[GPT-6.1 Sol low]
+    G -->|Broader reasoning| I[GPT-6.1 Sol medium]
     H --> J[Validate and self-review]
     I --> J
     J --> K[Compact handoff]
@@ -38,9 +38,9 @@ flowchart TD
 
 Owns user intent, planning, direct execution, integration, acceptance, and project-memory writes. Its model and reasoning effort remain those selected by the user; the skill does not reconfigure the main session.
 
-### Optional Astra worker
+### Optional GPT-6.1 Sol worker
 
-Owns a bounded delegated outcome. All workers, including researchers and reviewers, use `gpt-6-astra`. Low is for small tasks with clear inputs and direct checks; medium is for broader implementation, diagnosis, and cross-component reasoning. Medium is the ceiling on every worker attempt.
+Owns a bounded delegated outcome. All workers, including researchers and reviewers, use `gpt-6.1-sol`. Low is for small tasks with clear inputs and direct checks; medium is for broader implementation, diagnosis, and cross-component reasoning. Medium is the ceiling on every worker attempt.
 
 Select the profile through supported spawn controls. A role label does not enforce a model. If the profile is unavailable, main can continue directly when feasible and disclose the limitation. Do not silently substitute a worker model.
 
@@ -106,7 +106,7 @@ useful delegation = isolated context + independent progress + specific evidence 
 coordination cost = repeated inputs + packets + handoffs + review + integration
 ```
 
-Choose delegation when its benefit is worth that cost. Astra low is a scope choice, not a claim that Astra tokens are cheap. No universal quality, speed, or cost advantage is asserted.
+Choose delegation when its benefit is worth that cost. GPT-6.1 Sol low is a scope choice, not a claim that GPT-6.1 Sol tokens are cheap. No universal quality, speed, or cost advantage is asserted.
 
 Keep packets and handoffs small. Load only relevant memory, deduplicate durable notes, and archive old history when it becomes cumbersome. Do not add a token ledger or runtime to estimate an unmeasured saving.
 

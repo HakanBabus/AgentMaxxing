@@ -5,7 +5,7 @@ AgentMaxxing should remain lightweight.
 Good contributions usually improve:
 
 - single-agent execution and useful delegation decisions;
-- Astra low/medium routing;
+- GPT-6.1 Sol low/medium routing;
 - worker-packet clarity;
 - context isolation;
 - compact handoffs;

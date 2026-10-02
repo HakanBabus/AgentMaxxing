@@ -2,9 +2,10 @@
 
 ## 2026-10-02 — User-directed redesign
 
-- D-01: Direct work by default; optional Astra low for small tasks, medium for
-  broader work, with medium ceiling. Main keeps its selected model. Astra
-  supersedes the earlier Sol worker proposal and prior worker profile.
+- D-01: Direct work by default; optional GPT-6.1 Sol low for small tasks,
+  medium for broader work, with medium ceiling. Main keeps its selected model.
+  The user corrected the earlier Astra selection on 2026-10-02: use
+  `gpt-6.1-sol` throughout the worker workflow. Astra is superseded.
 - D-02: Future features and release notes were being lost in chat. Use existing
   documents or a small Markdown tree; capture in the same turn, distinguish
   ideas from accepted/deferred work, and avoid runtime infrastructure.

@@ -7,7 +7,9 @@ Target: Unreleased | Updated: 2026-10-02.
 - [x] Skill Creator validation and UI metadata checks.
 - [x] Markdown lint, local links/anchors, and bilingual behavior alignment.
 - [x] First-use fixtures: existing dirty Git project and read-only non-Git project.
-- [x] Review current Astra low/medium rules and run `git diff --check`.
+- [x] Review current GPT-6.1 Sol low/medium rules and run `git diff --check`.
+- [x] Apply the user's model correction across skill, docs, and installed files;
+  verify installed file hashes and skill metadata after the update.
 - [x] User authorized commit/push and local skill update for this revision.
 
 ## Evidence and limits

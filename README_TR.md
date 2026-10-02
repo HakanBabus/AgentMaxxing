@@ -4,11 +4,11 @@
 
 **Odaklı uygulama. Faydalı delegasyon. Kalıcı proje yönü.**
 
-**Tek ajanla çalışma**, isteğe bağlı **Astra low/medium alt ajanları** ve **kısa proje hafızası** için hafif bir Codex skill'i.
+**Tek ajanla çalışma**, isteğe bağlı **GPT-6.1 Sol low/medium alt ajanları** ve **kısa proje hafızası** için hafif bir Codex skill'i.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![Default](https://img.shields.io/badge/default-single%20agent-2563eb)
-![Workers](https://img.shields.io/badge/workers-Astra%20low%20%2F%20medium-7c3aed)
+![Workers](https://img.shields.io/badge/workers-GPT--6.1%20Sol%20low%20%2F%20medium-7c3aed)
 ![Memory](https://img.shields.io/badge/memory-Markdown-059669)
 
 [English](README.md) · [Türkçe](README_TR.md)
@@ -23,7 +23,7 @@
 
 | Uygulama | Alt ajanlar | Süreklilik |
 | --- | --- | --- |
-| **Tek entegrasyon sahibi** | **Astra low veya medium** | **Kısa, kaynaklı Markdown notları** |
+| **Tek entegrasyon sahibi** | **GPT-6.1 Sol low veya medium** | **Kısa, kaynaklı Markdown notları** |
 | Aşamaları otomatik alt ajan açmadan planla | Seviyeyi göreve uyarla; üst sınır medium | Amaç, koşul ve kanıtı oturumlar arasında koru |
 
 ## Hızlı başlangıç
@@ -45,7 +45,7 @@ $agentmaxxing Kaydetme/yeniden yükleme hatasını düzelt. Kapsamı koru ve do�
 
 Projenin ortasında mısın? Aynı çağrıyı kullan. **Önceden AgentMaxxing notları bulunması gerekmiyor.** Skill önce mevcut dosya ve belgelerden durumu anlar.
 
-Ana oturum, seçtiğin model ve reasoning seviyesini korur. İsteğe bağlı alt ajanlar `gpt-6-astra` ile `low` veya `medium` kullanır. Otomatik skill çağırma kapalı kalır. Yerel keşif ve çağırma davranışı için [resmî skills rehberine](https://learn.chatgpt.com/docs/build-skills) bak.
+Ana oturum, seçtiğin model ve reasoning seviyesini korur. İsteğe bağlı alt ajanlar `gpt-6.1-sol` ile `low` veya `medium` kullanır. Otomatik skill çağırma kapalı kalır. Yerel keşif ve çağırma davranışı için [resmî skills rehberine](https://learn.chatgpt.com/docs/build-skills) bak.
 
 ## Çalışma akışı
 
@@ -58,7 +58,7 @@ flowchart TD
     C --> E[Sonuçları ve kontrolleri planla]
     E --> F{Delegasyon faydalı mı?}
     F -->|Hayır| G[Ana ajan uygular ve kendini kontrol eder]
-    F -->|Evet| H[Astra low veya medium alt ajan]
+    F -->|Evet| H[GPT-6.1 Sol low veya medium alt ajan]
     H --> I[Kendi kontrolü ve kısa kanıt]
     I --> J{Ana ajan kabul etti mi?}
     J -->|Düzelt ve yeniden kontrol et| H
@@ -104,17 +104,17 @@ Büyük bir görev, aşamalar boyunca tek ajanla ilerleyebilir. Delegasyon ayrı
 | Yol | Uygun olduğu durum | Örnek |
 | --- | --- | --- |
 | **Ana ajan** | Mevcut bağlam veya sıkı bağlı kararlar | Ana ajanın zaten anladığı yerel düzeltme |
-| **Astra low** | Küçük kapsam, stabil girdiler, doğrudan doğrulama | Odaklı arama, belge düzenlemesi veya bilinen hatanın düzeltmesi |
-| **Astra medium** | Daha kapsamlı sınırlı iş veya etkileşen gereksinimler | Dosyalar arası teşhis veya bir migration adımı |
+| **GPT-6.1 Sol low** | Küçük kapsam, stabil girdiler, doğrudan doğrulama | Odaklı arama, belge düzenlemesi veya bilinen hatanın düzeltmesi |
+| **GPT-6.1 Sol medium** | Daha kapsamlı sınırlı iş veya etkileşen gereksinimler | Dosyalar arası teşhis veya bir migration adımı |
 | **Salt okunur reviewer** | Somut risk veya kanıt eksikliği | Kabul edilmiş aşamalar arasındaki kurtarma davranışını doğrulama |
 
-- Desteklenen başlatma kontrollerinde **`gpt-6-astra`** ve **`low` veya `medium`** seviyesini açıkça seç.
+- Desteklenen başlatma kontrollerinde **`gpt-6.1-sol`** ve **`low` veya `medium`** seviyesini açıkça seç.
 - Araştırma, reviewer ve düzeltme denemeleri dahil **üst sınır medium**.
 - Low zorlanırsa paketi iyileştir ve gerekçesi varsa medium kullan. Medium zorlanırsa görevi daralt, kanıtı iyileştir veya sıkı bağlı kararı ana ajana geri getir.
 - Alt ajan sayısını gerçek bağımsızlık ve istemci sınırları belirler. Eşzamanlı yazarların kapsamı çakışmamalıdır; ortak hafızaya ana ajan yazar.
 - Profil mevcut değilse ana ajan mümkün olduğunda doğrudan devam eder ve sınırlamayı belirtir. Başka bir alt ajan modeli sessizce seçilmez.
 
-Astra bu seviyeleri [resmî model belgesinde](https://developers.openai.com/api/docs/models/gpt-6-astra) destekler. Yönlendirme politikası bu projenin tercihidir. Amaç gereksiz bağlamı ve koordinasyonu azaltmaktır; genel bir maliyet veya kalite üstünlüğü vaat edilmez.
+GPT-6.1 Sol bu seviyeleri [resmî model belgesinde](https://developers.openai.com/api/docs/models/gpt-6.1-sol) destekler. Yönlendirme politikası bu projenin tercihidir. Amaç gereksiz bağlamı ve koordinasyonu azaltmaktır; genel bir maliyet veya kalite üstünlüğü vaat edilmez.
 
 ## Küçük hafıza, korunan bilgi
 

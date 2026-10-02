@@ -1,6 +1,6 @@
 ---
 name: agentmaxxing
-description: Keep coding work focused with single-agent execution, optional scoped GPT-6 Astra workers at low or medium effort, and lightweight project memory for future work and release checks. Use when the user explicitly invokes $agentmaxxing or asks to use AgentMaxxing.
+description: Keep coding work focused with single-agent execution, optional scoped GPT-6.1 Sol workers at low or medium effort, and lightweight project memory for future work and release checks. Use when the user explicitly invokes $agentmaxxing or asks to use AgentMaxxing.
 ---
 
 # AgentMaxxing
@@ -10,7 +10,7 @@ Complete the user's work with one integration owner, small working context, and 
 ## Core rules
 
 - **Single agent first.** A substantial task may need stages without needing more agents. Keep the main session's selected model; this skill does not reconfigure it.
-- **Astra workers.** For delegated work, explicitly select `gpt-6-astra` and `low` for simple, clearly bounded tasks or `medium` for broader reasoning and implementation. Medium is the worker ceiling, including reviewers and retries.
+- **GPT-6.1 Sol workers.** For delegated work, explicitly select `gpt-6.1-sol` and `low` for simple, clearly bounded tasks or `medium` for broader reasoning and implementation. Medium is the worker ceiling, including reviewers and retries.
 - **Useful delegation only.** A small task can use a low worker when isolation or parallel progress helps; do it directly when explaining it would cost more than completing it. Worker count follows real independence and the client's limits.
 - **Clear ownership.** Give each active writer a non-overlapping scope and concise acceptance criteria. Main owns integration and project-memory writes.
 - **Evidence before completion.** The implementing agent validates and self-reviews. Main accepts delegated results before dependent work starts. Independent review needs a concrete risk or evidence gap.

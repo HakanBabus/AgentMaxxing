@@ -5,7 +5,7 @@ Updated: 2026-10-02 | Source: user's redesign and follow-up requests.
 ## Direction and constraints
 
 Focused, verified coding with one integration owner and compact project intent.
-Direct work is the default. Optional workers use Astra low for small, clear
+Direct work is the default. Optional workers use GPT-6.1 Sol low for small, clear
 outcomes or medium for broader work; medium is the ceiling. Main keeps the
 user's session settings. Keep English/Turkish behavior aligned and infrastructure
 minimal. VisionOffload remains outside this revision.

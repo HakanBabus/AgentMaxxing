@@ -5,7 +5,7 @@ Use the smallest packet that makes one outcome independently executable. Set mod
 ## Packet
 
 ```text
-MODEL: gpt-6-astra
+MODEL: gpt-6.1-sol
 EFFORT: low | medium (choose one before spawning)
 GOAL: <one observable outcome>
 WHY DELEGATED: <isolation, independent progress, or specific review need>
@@ -24,7 +24,7 @@ For low, keep the task small and clearly verifiable. For medium, retain one cohe
 ## Example: low
 
 ```text
-MODEL: gpt-6-astra
+MODEL: gpt-6.1-sol
 EFFORT: low
 GOAL: Fix the installation links in the English and Turkish README files.
 WHY DELEGATED: This edit can proceed independently of an unrelated CLI fix.
@@ -39,7 +39,7 @@ RETURN: Compact handoff; note any durable documentation obligation for main.
 ## Example: medium
 
 ```text
-MODEL: gpt-6-astra
+MODEL: gpt-6.1-sol
 EFFORT: medium
 GOAL: Preserve saved tasks while migrating storage format v1 to v2.
 WHY DELEGATED: Storage migration has an independent write scope.

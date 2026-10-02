@@ -3,7 +3,7 @@
 ## Unreleased — Single-agent work and project memory
 
 - Made direct single-agent execution the default, including compound staged work.
-- Replaced LUNA delegation with optional `gpt-6-astra` workers: low for small,
+- Replaced LUNA delegation with optional `gpt-6.1-sol` workers: low for small,
   clear tasks and medium for broader work; medium is the worker ceiling.
 - Kept the main session's user-selected model and effort unchanged.
 - Separated task decomposition from worker creation and made independent review

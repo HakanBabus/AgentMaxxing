@@ -7,17 +7,17 @@ Plan the work before choosing agents. Single-agent execution is the default at e
 | Situation | Route |
 | --- | --- |
 | Small change with context already loaded | Main completes and checks it |
-| Small independent task worth isolating | Optional Astra low worker |
-| Broader bounded implementation or investigation | Optional Astra medium worker |
+| Small independent task worth isolating | Optional GPT-6.1 Sol low worker |
+| Broader bounded implementation or investigation | Optional GPT-6.1 Sol medium worker |
 | Tightly coupled architecture and implementation | Main works through accepted milestones |
 | Independent research, log analysis, or implementation scopes | Optional parallel workers with effort chosen per task |
-| Concrete risk or missing independent evidence | Optional read-only Astra reviewer |
+| Concrete risk or missing independent evidence | Optional read-only GPT-6.1 Sol reviewer |
 
 Useful delegation isolates heavy intermediate material, makes independent progress, or brings an independent perspective to a specific uncertainty. A task being large, a worker being capable, or a deliverable being called final does not by itself justify more agents.
 
 ## Model and effort
 
-All AgentMaxxing workers use **`gpt-6-astra`**. Set the model and effort explicitly in the client's supported spawn controls; do not rely on inheritance or a prose role label. This profile covers implementing workers, researchers, reviewers, and correction workers. Main keeps the user's selected session model and effort.
+All AgentMaxxing workers use **`gpt-6.1-sol`**. Set the model and effort explicitly in the client's supported spawn controls; do not rely on inheritance or a prose role label. This profile covers implementing workers, researchers, reviewers, and correction workers. Main keeps the user's selected session model and effort.
 
 ### Low
 
@@ -41,7 +41,7 @@ Use `medium` for broader bounded work with interacting requirements or meaningfu
 
 **Medium is the ceiling.** If low misses a material reasoning requirement, improve the packet and move to medium when justified. If medium stalls, improve the evidence, isolate a smaller reproduction, split at real boundaries, or let main resolve the coupled decision. Never exceed medium or switch to another model as an implicit fallback.
 
-If Astra or the chosen effort is unavailable, main may continue directly within its existing settings. Disclose the worker-profile limitation and ask only if the user's requirements cannot otherwise be met.
+If GPT-6.1 Sol or the chosen effort is unavailable, main may continue directly within its existing settings. Disclose the worker-profile limitation and ask only if the user's requirements cannot otherwise be met.
 
 ## Compound tasks and stages
 
@@ -50,8 +50,8 @@ Consider subsystems, dependencies, migration steps, user flows, and validation s
 ```text
 S1 — define interface | depends: none | owner: main | check: approved contract
 S2 — implement flow | depends: S1 accepted | owner: main | check: behavior tests
-S3 — update examples | depends: S1 accepted | owner: optional Astra low | check: examples match contract
-S4 — investigate migration | depends: S2 accepted | owner: optional Astra medium | check: migration cases
+S3 — update examples | depends: S1 accepted | owner: optional GPT-6.1 Sol low | check: examples match contract
+S4 — investigate migration | depends: S2 accepted | owner: optional GPT-6.1 Sol medium | check: migration cases
 ```
 
 Only spawn optional owners after deciding delegation adds value. Keep transient stage ownership in working context. Persist future commitments and durable decisions in project memory, not every spawn, wait, or acceptance event.
