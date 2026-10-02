@@ -19,5 +19,7 @@ do not establish general model quality or cost savings. Memory is captured durin
 background service; abrupt interruption can still lose unwritten information.
 Profile availability is client-dependent; see the [skill](../.agents/skills/agentmaxxing/SKILL.md).
 
-Delivery: push the validated revision and verify installed skill contents match
-it. Recording authorization does not claim either action has already occurred.
+Local delivery: installed skill updated, all five file hashes match the validated
+repository source, and the previous installation is backed up outside skills.
+Publication is pending: CLI credentials are invalid and the connected GitHub
+integration rejected the write with HTTP 403. Renew authentication before push.

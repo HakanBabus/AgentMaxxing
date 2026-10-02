@@ -17,6 +17,8 @@ and release conditions; exact detail stays discoverable through links.
 ## Current delivery
 
 README refresh, safe first use, and compact memory passed local verification.
+The user-installed skill was updated and hash-verified; repository publication
+is pending GitHub authentication renewal.
 The latest user request authorizes commit/push and the local Codex skill update
 for this revision, superseding the earlier no-push request.
 
